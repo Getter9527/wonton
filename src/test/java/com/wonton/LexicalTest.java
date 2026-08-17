@@ -17,12 +17,12 @@ public class LexicalTest {
 
     @Test
     void testTokenize() {
-        String source = FileUtils.readSource("scripts/hello.wonton");
+        final String source = FileUtils.readSource("scripts/hello.wonton");
         Lexer lexer = new Lexer(source);
         List<Token> tokens = lexer.tokenize();
-        System.out.println("------------------------------------------------------------------");
-        for (Token token : tokens) {
-            System.out.println(token);
+        System.out.println("[token] ----------------------------------------------------------");
+        for (var i = 0; i < tokens.size(); i++) {
+            System.out.printf("序号: %-6s %s%n", i+1, tokens.get(i));
         }
         System.out.println("------------------------------------------------------------------");
     }
