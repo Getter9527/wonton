@@ -197,7 +197,7 @@ public class Parser {
     }
 
     private void parseError(String message, int line) {
-        Logger.error("[行号：{0}] {1}", line, message);
+        Logger.error("[行 {1} 列 {2}] {0}", message, line, "3:10");
         // 一般性错误导致的退出程序
         System.exit(1);
     }
