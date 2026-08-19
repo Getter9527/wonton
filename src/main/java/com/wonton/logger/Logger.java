@@ -2,6 +2,8 @@ package com.wonton.logger;
 
 import com.wonton.logger.console.ConsoleAppender;
 
+import java.text.MessageFormat;
+
 public class Logger {
 
     private static LogAppender appender = new ConsoleAppender();
@@ -18,28 +20,28 @@ public class Logger {
         appender.setLevel(level);
     }
 
-    public static void debug(String message) {
-        appender.log(LogLevel.DEBUG, message);
+    public static void debug(String pattern, Object... args) {
+        appender.log(LogLevel.DEBUG, MessageFormat.format(pattern, args));
     }
 
-    public static void info(String message) {
-        appender.log(LogLevel.INFO, message);
+    public static void info(String pattern, Object... args) {
+        appender.log(LogLevel.INFO, MessageFormat.format(pattern, args));
     }
 
-    public static void primary(String message) {
-        appender.log(LogLevel.PRIMARY, message);
+    public static void primary(String pattern, Object... args) {
+        appender.log(LogLevel.PRIMARY, MessageFormat.format(pattern, args));
     }
 
-    public static void warn(String message) {
-        appender.log(LogLevel.WARN, message);
+    public static void warn(String pattern, Object... args) {
+        appender.log(LogLevel.WARN, MessageFormat.format(pattern, args));
     }
 
-    public static void error(String message) {
-        appender.log(LogLevel.ERROR, message);
+    public static void error(String pattern, Object... args) {
+        appender.log(LogLevel.ERROR, MessageFormat.format(pattern, args));
     }
 
-    public static void success(String message) {
-        appender.log(LogLevel.SUCCESS, message);
+    public static void success(String pattern, Object... args) {
+        appender.log(LogLevel.SUCCESS, MessageFormat.format(pattern, args));
     }
 
 }
