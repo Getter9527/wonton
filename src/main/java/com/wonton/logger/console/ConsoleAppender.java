@@ -16,8 +16,8 @@ public class ConsoleAppender extends LogAppender {
         String trueColor = TrueColor.foreground(level.getHexColor());
         builder.append(trueColor);
         builder.append("[").append(level.getLabel()).append("]  ");
-        builder.append(TrueColor.reset());
         builder.append(message);
+        builder.append(TrueColor.reset());
         System.out.println(builder);
     }
 }
