@@ -1,5 +1,6 @@
 package com.wonton.lexical;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -120,13 +121,33 @@ public class Lexer {
     }
 
     private void addToken(TokenType type) {
-        Token token = new Token(type, getLexeme(), line);
+        Token token = new Token(type, getLexeme(), getLiteral(type), line);
         tokens.add(token);
     }
 
     // 获取当前词素
     private String getLexeme() {
         return source.substring(start, current);
+    }
+
+    // 获取当前字面量
+    private Object getLiteral(TokenType type) {
+        if (type == TokenType.Str) {
+            return source.substring(start + 1, current - 1);
+        }
+        if (type == TokenType.Int) {
+            return Long.parseLong(getLexeme());
+        }
+        if (type == TokenType.Decimal) {
+            return new BigDecimal(getLexeme());
+        }
+        if (type == TokenType.True) {
+            return Boolean.TRUE;
+        }
+        if (type == TokenType.False) {
+            return Boolean.FALSE;
+        }
+        return null;
     }
 
     // 判断字符是否是数字

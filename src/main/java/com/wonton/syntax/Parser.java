@@ -5,6 +5,7 @@ import com.wonton.lexical.TokenType;
 import com.wonton.logger.Logger;
 import com.wonton.syntax.expression.*;
 
+import java.math.BigDecimal;
 import java.text.MessageFormat;
 import java.util.List;
 
@@ -92,12 +93,12 @@ public class Parser {
      */
     public Expr primary() {
         if (match(TokenType.Int)) {
-            Token integerToken = previous();
-            return new IntegerExpr(integerToken.getLexeme());
+            Long literal = ((Long) previous().getLiteral());
+            return new IntegerExpr(literal);
         }
         if (match(TokenType.Decimal)) {
-            Token decimalToken = previous();
-            return new DecimalExpr(decimalToken.getLexeme());
+            BigDecimal literal = (BigDecimal) previous().getLiteral();
+            return new DecimalExpr(literal);
         }
         // 解析左括号
         if (match(TokenType.LeftParen)) {

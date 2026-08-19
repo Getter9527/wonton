@@ -4,16 +4,14 @@ import java.math.BigDecimal;
 
 public class DecimalExpr extends Expr {
 
-    private final String value;
-    private final BigDecimal realValue;
+    private final BigDecimal value;
 
-    public DecimalExpr(String value) {
+    public DecimalExpr(BigDecimal value) {
         this.value = value;
-        this.realValue = new BigDecimal(value);
     }
 
     public BigDecimal getValue() {
-        return realValue;
+        return value;
     }
 
     @Override

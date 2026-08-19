@@ -2,16 +2,14 @@ package com.wonton.syntax.expression;
 
 public class IntegerExpr extends Expr {
 
-    private final String value;
-    private final Integer realValue;
+    private final Long value;
 
-    public IntegerExpr(String value) {
+    public IntegerExpr(Long value) {
         this.value = value;
-        this.realValue = Integer.parseInt(value);
     }
 
-    public Integer getValue() {
-        return realValue;
+    public Long getValue() {
+        return value;
     }
 
     @Override
