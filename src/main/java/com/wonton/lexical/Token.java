@@ -23,6 +23,10 @@ public class Token {
         return lexeme;
     }
 
+    public int getLine() {
+        return line;
+    }
+
     @Override
     public String toString() {
         return String.format("类型: %-16s  词素: %-16s  行: %-6s", type, lexeme, line);

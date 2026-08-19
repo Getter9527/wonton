@@ -2,6 +2,7 @@ package com.wonton.syntax;
 
 import com.wonton.lexical.Token;
 import com.wonton.lexical.TokenType;
+import com.wonton.logger.Logger;
 import com.wonton.syntax.expression.*;
 
 import java.text.MessageFormat;
@@ -102,12 +103,11 @@ public class Parser {
         if (match(TokenType.LeftParen)) {
             // 解析括号中的表达式
             Expr expression = expr();
-            // 解析右括号
-            if (match(TokenType.RightParen)) {
-                return new ParenExpr(expression);
+            // 解析右括号，如果没有匹配到右括号，则抛出异常
+            if (!match(TokenType.RightParen)) {
+                parseError("表达式未闭合，缺少右括号", previous().getLine());
             }
-            // 如果没有匹配到右括号，则抛出异常
-            throw new RuntimeException("表达式未闭合，缺少右括号");
+            return new ParenExpr(expression);
         }
         return null;
     }
@@ -180,18 +180,26 @@ public class Parser {
     }
 
     public Token expect(TokenType type) {
+        // 防止获取下一个元素时，下坐标越界
         if (current >= tokens.size()) {
-            throw new RuntimeException(
-                MessageFormat.format("下坐标越界，错误发生在：{0}", previous().getLexeme())
-            );
+            Token token = previous();
+            final String errMsg = MessageFormat.format("下坐标越界，错误发生在：{0}", token.getLexeme());
+            parseError(errMsg, token.getLine());
         }
+        // 不符合预期
         Token token = peek();
         if (token.getType() != type) {
-            throw new RuntimeException(
-                MessageFormat.format("期望 {0} 但实际遇到 {1}", type, token.getType())
-            );
+            final String errMsg = MessageFormat.format("期望 {0} 但实际遇到 {1}", type, token.getType());
+            parseError(errMsg, token.getLine());
         }
+        // 符合预期
         return advance();
+    }
+
+    private void parseError(String message, int line) {
+        Logger.error("[行号：{0}] {1}", line, message);
+        // 一般性错误导致的退出程序
+        System.exit(1);
     }
 
 }
