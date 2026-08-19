@@ -9,11 +9,12 @@ import java.util.List;
 public class Lexer {
 
     private final String source;
+    private final List<Token> tokens = new ArrayList<>();
+    // 每个被扫描词素的起始位置
     private int start = 0;
     // 下一个即将被处理的字符
     private int current = 0;
     private int line = 1;
-    private final List<Token> tokens = new ArrayList<>();
 
     public Lexer(String source) {
         this.source = source;
@@ -21,7 +22,7 @@ public class Lexer {
 
     // 核心代码：分词
     public List<Token> tokenize() {
-        while (current < source.length()) {
+        while (!isAtEnd()) {
             /*
              * 外层循环每次结束，都表示添加了一个token
              * 所以start每次都会指向下一个token开始的位置
@@ -155,7 +156,7 @@ public class Lexer {
 
     // 查看当前指针的字符，但是不消费它
     private char peek() {
-        if (current >= source.length()) return '\0';
+        if (isAtEnd()) return '\0';
         return source.charAt(current);
     }
 
@@ -168,7 +169,7 @@ public class Lexer {
 
     // 匹配
     private boolean match(char target) {
-        if (current >= source.length()) {
+        if (isAtEnd()) {
             return false;
         }
         if(peek() != target) {
@@ -176,6 +177,11 @@ public class Lexer {
         }
         current++;
         return true;
+    }
+
+    // 是否已消费完所有字符
+    private boolean isAtEnd() {
+        return current >= source.length();
     }
 
 }
