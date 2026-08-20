@@ -14,6 +14,18 @@ public class BinaryExpr extends Expr {
         this.right = right;
     }
 
+    public Token getOperator() {
+        return operator;
+    }
+
+    public Expr getLeft() {
+        return left;
+    }
+
+    public Expr getRight() {
+        return right;
+    }
+
     @Override
     public String toString() {
         return "BinaryExpr(operator=" + operator + ", left=" + left + ", right=" + right + ")";

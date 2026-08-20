@@ -12,6 +12,14 @@ public class UnaryExpr extends Expr {
         this.operand = operand;
     }
 
+    public Token getOperator() {
+        return operator;
+    }
+
+    public Expr getOperand() {
+        return operand;
+    }
+
     @Override
     public String toString() {
         return "UnaryExpr(operator=" + operator + ", operand=" + operand + ")";

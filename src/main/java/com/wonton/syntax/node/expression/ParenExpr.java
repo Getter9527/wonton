@@ -8,6 +8,10 @@ public class ParenExpr extends Expr {
         this.expression = expression;
     }
 
+    public Expr getExpression() {
+        return expression;
+    }
+
     @Override
     public String toString() {
         return "ParenExpr(" + expression + ")";
