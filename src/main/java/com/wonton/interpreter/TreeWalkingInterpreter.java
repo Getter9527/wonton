@@ -7,6 +7,9 @@ import com.wonton.syntax.node.expression.*;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 
+/**
+ * 树遍历解释器
+ */
 public class TreeWalkingInterpreter {
 
     public Object interpret(Node ast) {

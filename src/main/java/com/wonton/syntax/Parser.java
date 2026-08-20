@@ -92,8 +92,11 @@ public class Parser {
      * <p>括号是 primary 的特殊形式，它的语义是"把子表达式打包成一个整体"，通过递归调用 expr() 解析这个内部的子表达式。</p>
      */
     public Expr primary() {
+        // <primary> ::= <integer> | <decimal> | <boolean> | <string> | <paren>
+        // <boolean>::= "true" | "false"
+        // <paren>  ::= "(" <expr> ")"
         if (match(TokenType.Int)) {
-            Long literal = ((Long) previous().getLiteral());
+            Long literal = (Long) previous().getLiteral();
             return new IntegerExpr(literal);
         }
         if (match(TokenType.Decimal)) {

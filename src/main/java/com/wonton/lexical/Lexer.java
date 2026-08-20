@@ -69,7 +69,7 @@ public class Lexer {
                 advance();
                 addToken(TokenType.Str);
             }
-            // 标识符
+            // 标识符 和 所有关键字
             else if(isIdentifierStart(ch)) {
                 while (isIdentifierPart(peek())) {
                     advance();
