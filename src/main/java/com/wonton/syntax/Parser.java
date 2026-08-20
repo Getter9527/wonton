@@ -103,6 +103,14 @@ public class Parser {
             BigDecimal literal = (BigDecimal) previous().getLiteral();
             return new DecimalExpr(literal);
         }
+        if (match(TokenType.Str)) {
+            String literal = (String) previous().getLiteral();
+            return new StringExpr(literal);
+        }
+        if (match(TokenType.Boolean)) {
+            Boolean literal = (Boolean) previous().getLiteral();
+            return new BooleanExpr(literal);
+        }
         // 解析左括号
         if (match(TokenType.LeftParen)) {
             // 解析括号中的表达式
