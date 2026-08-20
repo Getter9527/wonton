@@ -41,7 +41,6 @@ public enum TokenType {
 
     Print,
     Println,
-    True,
-    False,
+    Boolean,
     Null,
 }

@@ -15,8 +15,8 @@ public class Keywords {
         keywords.put("while", TokenType.While);
         keywords.put("return", TokenType.Return);
         keywords.put("const", TokenType.Const);
-        keywords.put("true", TokenType.True);
-        keywords.put("false", TokenType.False);
+        keywords.put("true", TokenType.Boolean);
+        keywords.put("false", TokenType.Boolean);
         keywords.put("var", TokenType.Var);
         keywords.put("int", TokenType.Int);
         keywords.put("decimal", TokenType.Decimal);

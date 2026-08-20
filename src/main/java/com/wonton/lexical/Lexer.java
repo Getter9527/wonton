@@ -141,11 +141,8 @@ public class Lexer {
         if (type == TokenType.Decimal) {
             return new BigDecimal(getLexeme());
         }
-        if (type == TokenType.True) {
-            return Boolean.TRUE;
-        }
-        if (type == TokenType.False) {
-            return Boolean.FALSE;
+        if (type == TokenType.Boolean) {
+            return Boolean.valueOf(getLexeme());
         }
         return null;
     }
