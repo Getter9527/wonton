@@ -3,7 +3,7 @@ package com.wonton;
 import com.wonton.lexical.Lexer;
 import com.wonton.lexical.Token;
 import com.wonton.syntax.Parser;
-import com.wonton.syntax.expression.Expr;
+import com.wonton.syntax.node.expression.Expr;
 import com.wonton.utils.FileUtils;
 import org.junit.jupiter.api.Test;
 

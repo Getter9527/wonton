@@ -1,4 +1,4 @@
-package com.wonton.syntax.expression;
+package com.wonton.syntax.node.expression;
 
 import com.wonton.lexical.Token;
 

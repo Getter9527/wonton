@@ -3,7 +3,7 @@ package com.wonton.syntax;
 import com.wonton.lexical.Token;
 import com.wonton.lexical.TokenType;
 import com.wonton.logger.Logger;
-import com.wonton.syntax.expression.*;
+import com.wonton.syntax.node.expression.*;
 
 import java.math.BigDecimal;
 import java.text.MessageFormat;

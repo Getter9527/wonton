@@ -1,4 +1,4 @@
-package com.wonton.syntax.expression;
+package com.wonton.syntax.node.expression;
 
 public class IntegerExpr extends Expr {
 

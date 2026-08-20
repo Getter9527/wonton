@@ -1,6 +1,8 @@
-package com.wonton.syntax.expression;
+package com.wonton.syntax.node.expression;
 
-public abstract class Expr {
+import com.wonton.syntax.node.Node;
+
+public abstract class Expr extends Node {
 
     protected abstract String pretty(int depth);
 
