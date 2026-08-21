@@ -12,57 +12,64 @@ import java.math.RoundingMode;
  */
 public class TreeWalkingInterpreter {
 
-    public Object interpret(Node ast) {
-        if(ast instanceof IntegerExpr node) {
-            return node.getValue();
+    public Value interpret(Node node) {
+        if(node instanceof IntegerExpr intNode) {
+            return new Value(RuntimeType.Number, intNode.getValue());
         }
-        if (ast instanceof DecimalExpr node) {
-            return node.getValue();
+        if (node instanceof DecimalExpr decimalNode) {
+            return new Value(RuntimeType.Number, decimalNode.getValue());
         }
-        if (ast instanceof ParenExpr paren) {
-            return interpret(paren.getExpression());
+        if (node instanceof ParenExpr parenNode) {
+            return interpret(parenNode.getExpression());
         }
-        if (ast instanceof BinaryExpr binary) {
-            TokenType operator = binary.getOperator().getType();
-            Object leftOperand = interpret(binary.getLeft());
-            Object rightOperand = interpret(binary.getRight());
+        if (node instanceof BinaryExpr binNode) {
+            TokenType operator = binNode.getOperator().getType();
+            Object leftOperand = interpret(binNode.getLeft());
+            Object rightOperand = interpret(binNode.getRight());
             if (operator == TokenType.Plus) {
                 BigDecimal leftValue = toBigDecimal(leftOperand);
                 BigDecimal rightValue = toBigDecimal(rightOperand);
-                return leftValue.add(rightValue);
+                BigDecimal result = leftValue.add(rightValue);
+                return new Value(RuntimeType.Number, result);
             }
             if (operator == TokenType.Minus) {
                 BigDecimal leftValue = toBigDecimal(leftOperand);
                 BigDecimal rightValue = toBigDecimal(rightOperand);
-                return leftValue.subtract(rightValue);
+                BigDecimal result = leftValue.subtract(rightValue);
+                return new Value(RuntimeType.Number, result);
             }
             if (operator == TokenType.Star) {
                 BigDecimal leftValue = toBigDecimal(leftOperand);
                 BigDecimal rightValue = toBigDecimal(rightOperand);
-                return leftValue.multiply(rightValue);
+                BigDecimal result = leftValue.multiply(rightValue);
+                return new Value(RuntimeType.Number, result);
             }
             if (operator == TokenType.Slash) {
                 // TODO 关于小数位除不尽和取舍的数学问题探讨和解决方案设计
                 BigDecimal leftValue = toBigDecimal(leftOperand);
                 BigDecimal rightValue = toBigDecimal(rightOperand);
-                return leftValue.divide(rightValue, 2, RoundingMode.HALF_UP);
+                BigDecimal result = leftValue.divide(rightValue, 2, RoundingMode.HALF_UP);
+                return new Value(RuntimeType.Number, result);
             }
         }
-        if (ast instanceof UnaryExpr unary) {
-            TokenType operator = unary.getOperator().getType();
-            Object operand = interpret(unary.getOperand());
+        if (node instanceof UnaryExpr unaryNode) {
+            TokenType operator = unaryNode.getOperator().getType();
+            Object operand = interpret(unaryNode.getOperand());
             if (operator == TokenType.Plus) {
-                return toBigDecimal( operand );
+                BigDecimal result = toBigDecimal(operand);
+                return new Value(RuntimeType.Number, result);
             }
             if (operator == TokenType.Minus) {
                 // 相反数（取反）
-                return toBigDecimal(operand).negate();
+                BigDecimal result = toBigDecimal(operand).negate();
+                return new Value(RuntimeType.Number, result);
             }
             if (operator == TokenType.NOT) {
-                return !toBoolean(operand);
+                Boolean result = !toBoolean(operand);
+                return new Value(RuntimeType.Boolean, result);
             }
         }
-        throw new RuntimeException("Unknown node type: " + ast.getClass().getName());
+        throw new RuntimeException("未知的语法树节点类型: " + node.getClass().getName());
     }
 
     private Boolean toBoolean(Object value) {
