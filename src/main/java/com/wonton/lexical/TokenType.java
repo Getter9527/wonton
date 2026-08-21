@@ -37,12 +37,12 @@ public enum TokenType {
     Integer,
     Decimal,
     String,
+    Boolean,
+    Null,
     Void,
 
     Print,
     Println,
-    Boolean,
-    Null,
 
     EOF,                // 文件结束
 }

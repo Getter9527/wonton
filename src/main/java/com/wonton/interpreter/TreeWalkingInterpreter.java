@@ -14,58 +14,58 @@ public class TreeWalkingInterpreter {
 
     public Value interpret(Node node) {
         if(node instanceof IntegerExpr intNode) {
-            return new Value(RuntimeType.Number, intNode.getValue());
+            return new Value(RuntimeType.Integer, intNode.getValue());
         }
         if (node instanceof DecimalExpr decimalNode) {
-            return new Value(RuntimeType.Number, decimalNode.getValue());
+            return new Value(RuntimeType.Decimal, decimalNode.getValue());
         }
         if (node instanceof ParenExpr parenNode) {
             return interpret(parenNode.getExpression());
         }
         if (node instanceof BinaryExpr binNode) {
             TokenType operator = binNode.getOperator().getType();
-            Object leftOperand = interpret(binNode.getLeft());
-            Object rightOperand = interpret(binNode.getRight());
+            Value leftOperand = interpret(binNode.getLeft());
+            Value rightOperand = interpret(binNode.getRight());
             if (operator == TokenType.Plus) {
-                BigDecimal leftValue = toBigDecimal(leftOperand);
-                BigDecimal rightValue = toBigDecimal(rightOperand);
+                BigDecimal leftValue = toBigDecimal(leftOperand.getValue());
+                BigDecimal rightValue = toBigDecimal(rightOperand.getValue());
                 BigDecimal result = leftValue.add(rightValue);
-                return new Value(RuntimeType.Number, result);
+                return new Value(RuntimeType.Decimal, result);
             }
             if (operator == TokenType.Minus) {
-                BigDecimal leftValue = toBigDecimal(leftOperand);
-                BigDecimal rightValue = toBigDecimal(rightOperand);
+                BigDecimal leftValue = toBigDecimal(leftOperand.getValue());
+                BigDecimal rightValue = toBigDecimal(rightOperand.getValue());
                 BigDecimal result = leftValue.subtract(rightValue);
-                return new Value(RuntimeType.Number, result);
+                return new Value(RuntimeType.Decimal, result);
             }
             if (operator == TokenType.Star) {
-                BigDecimal leftValue = toBigDecimal(leftOperand);
-                BigDecimal rightValue = toBigDecimal(rightOperand);
+                BigDecimal leftValue = toBigDecimal(leftOperand.getValue());
+                BigDecimal rightValue = toBigDecimal(rightOperand.getValue());
                 BigDecimal result = leftValue.multiply(rightValue);
-                return new Value(RuntimeType.Number, result);
+                return new Value(RuntimeType.Decimal, result);
             }
             if (operator == TokenType.Slash) {
                 // TODO 关于小数位除不尽和取舍的数学问题探讨和解决方案设计
-                BigDecimal leftValue = toBigDecimal(leftOperand);
-                BigDecimal rightValue = toBigDecimal(rightOperand);
+                BigDecimal leftValue = toBigDecimal(leftOperand.getValue());
+                BigDecimal rightValue = toBigDecimal(rightOperand.getValue());
                 BigDecimal result = leftValue.divide(rightValue, 2, RoundingMode.HALF_UP);
-                return new Value(RuntimeType.Number, result);
+                return new Value(RuntimeType.Decimal, result);
             }
         }
         if (node instanceof UnaryExpr unaryNode) {
             TokenType operator = unaryNode.getOperator().getType();
-            Object operand = interpret(unaryNode.getOperand());
+            Value operand = interpret(unaryNode.getOperand());
             if (operator == TokenType.Plus) {
-                BigDecimal result = toBigDecimal(operand);
-                return new Value(RuntimeType.Number, result);
+                BigDecimal result = toBigDecimal(operand.getValue());
+                return new Value(RuntimeType.Decimal, result);
             }
             if (operator == TokenType.Minus) {
                 // 相反数（取反）
-                BigDecimal result = toBigDecimal(operand).negate();
-                return new Value(RuntimeType.Number, result);
+                BigDecimal result = toBigDecimal(operand.getValue()).negate();
+                return new Value(RuntimeType.Decimal, result);
             }
             if (operator == TokenType.Not) {
-                Boolean result = !toBoolean(operand);
+                Boolean result = !toBoolean(operand.getValue());
                 return new Value(RuntimeType.Boolean, result);
             }
         }

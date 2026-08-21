@@ -14,8 +14,7 @@ public class Value {
         return runtimeType;
     }
 
-    public <T> T getValue(Class<T> clazz) {
-        // TODO 根据runtimeType进行类型检查？
-        return clazz.cast(value);
+    public Object getValue() {
+        return value;
     }
 }

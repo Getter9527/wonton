@@ -18,9 +18,6 @@ public class Keywords {
         keywords.put("true", TokenType.Boolean);
         keywords.put("false", TokenType.Boolean);
         keywords.put("var", TokenType.Variable);
-        keywords.put("int", TokenType.Integer);
-        keywords.put("decimal", TokenType.Decimal);
-        keywords.put("str", TokenType.String);
         keywords.put("void", TokenType.Void);
         keywords.put("print", TokenType.Print);
         keywords.put("println", TokenType.Println);
