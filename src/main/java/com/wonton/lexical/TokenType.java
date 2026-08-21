@@ -12,13 +12,13 @@ public enum TokenType {
     Comma,              // ,
     Semicolon,          // ;
     Equal,              // =
-    EqualX2,            // ==
-    NOT,                // !
+    Equalx2,            // ==
+    Not,                // !
     NotEqual,           // !=
-    GT,                 // >
-    GE,                 // >=
-    LT,                 // <
-    LE,                 // <=
+    Greater,            // >
+    GreaterEqual,       // >=
+    Less,               // <
+    LessEqual,          // <=
     LeftParen,          // (
     RightParen,         // )
     LeftBracket,        // [
@@ -33,14 +33,16 @@ public enum TokenType {
     Return,
 
     Const,
-    Var,
-    Int,
+    Variable,
+    Integer,
     Decimal,
-    Str,
+    String,
     Void,
 
     Print,
     Println,
     Boolean,
     Null,
+
+    EOF,                // 文件结束
 }

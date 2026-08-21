@@ -64,7 +64,7 @@ public class TreeWalkingInterpreter {
                 BigDecimal result = toBigDecimal(operand).negate();
                 return new Value(RuntimeType.Number, result);
             }
-            if (operator == TokenType.NOT) {
+            if (operator == TokenType.Not) {
                 Boolean result = !toBoolean(operand);
                 return new Value(RuntimeType.Boolean, result);
             }

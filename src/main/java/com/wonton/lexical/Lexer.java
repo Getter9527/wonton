@@ -51,7 +51,7 @@ public class Lexer {
                     }
                     addToken(TokenType.Decimal);
                 } else {
-                    addToken(TokenType.Int);
+                    addToken(TokenType.Integer);
                 }
             }
             // 空白符
@@ -67,7 +67,7 @@ public class Lexer {
                 }
                 // 消费剩下的那个引号
                 advance();
-                addToken(TokenType.Str);
+                addToken(TokenType.String);
             }
             // 标识符 和 所有关键字
             else if(isIdentifierStart(ch)) {
@@ -83,20 +83,20 @@ public class Lexer {
                 }
             }
             else if(ch == '=') {
-                if(match('=')) addToken(TokenType.EqualX2);
+                if(match('=')) addToken(TokenType.Equalx2);
                 else addToken(TokenType.Equal);
             }
             else if(ch == '!') {
                 if (match('=')) addToken(TokenType.NotEqual);
-                else addToken(TokenType.NOT);
+                else addToken(TokenType.Not);
             }
             else if(ch == '<') {
-                if (match('=')) addToken(TokenType.LE);
-                else addToken(TokenType.LT);
+                if (match('=')) addToken(TokenType.LessEqual);
+                else addToken(TokenType.Less);
             }
             else if(ch == '>') {
-                if (match('=')) addToken(TokenType.GE);
-                else addToken(TokenType.GT);
+                if (match('=')) addToken(TokenType.GreaterEqual);
+                else addToken(TokenType.Greater);
             }
             // 单字符
             else if(ch == '+') addToken(TokenType.Plus);
@@ -132,10 +132,10 @@ public class Lexer {
 
     // 获取当前字面量
     private Object getLiteral(TokenType type) {
-        if (type == TokenType.Str) {
+        if (type == TokenType.String) {
             return source.substring(start + 1, current - 1);
         }
-        if (type == TokenType.Int) {
+        if (type == TokenType.Integer) {
             return Long.parseLong(getLexeme());
         }
         if (type == TokenType.Decimal) {

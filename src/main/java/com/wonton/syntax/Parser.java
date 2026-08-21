@@ -74,7 +74,7 @@ public class Parser {
     public Expr unary() {
         // <unary>  ::= <op> <unary> | <primary>
         // <op>     ::= "+" | "-" | "~"
-        if (matchAny(TokenType.Plus, TokenType.Minus, TokenType.NOT)) {
+        if (matchAny(TokenType.Plus, TokenType.Minus, TokenType.Not)) {
             // 获取操作符（+、-、~）
             Token operator = previous();
             // 右侧的操作数本身可能也是一个一元表达式，所以这里递归
@@ -95,7 +95,7 @@ public class Parser {
         // <primary> ::= <integer> | <decimal> | <boolean> | <string> | <paren>
         // <boolean>::= "true" | "false"
         // <paren>  ::= "(" <expr> ")"
-        if (match(TokenType.Int)) {
+        if (match(TokenType.Integer)) {
             Long literal = (Long) previous().getLiteral();
             return new IntegerExpr(literal);
         }
@@ -103,7 +103,7 @@ public class Parser {
             BigDecimal literal = (BigDecimal) previous().getLiteral();
             return new DecimalExpr(literal);
         }
-        if (match(TokenType.Str)) {
+        if (match(TokenType.String)) {
             String literal = (String) previous().getLiteral();
             return new StringExpr(literal);
         }
