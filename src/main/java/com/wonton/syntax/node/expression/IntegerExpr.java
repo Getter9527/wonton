@@ -13,12 +13,7 @@ public class IntegerExpr extends Expr {
     }
 
     @Override
-    public String toString() {
-        return "IntegerExpr(value=" + value + ")";
-    }
-
-    @Override
-    protected String pretty(int depth) {
-        return indent(depth) + "IntegerExpr(" + value + ")";
+    public String pretty(int depth) {
+        return indent(depth) + "IntegerExpr(" + getValue() + ")";
     }
 }

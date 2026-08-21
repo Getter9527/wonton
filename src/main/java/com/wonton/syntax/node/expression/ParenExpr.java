@@ -13,14 +13,9 @@ public class ParenExpr extends Expr {
     }
 
     @Override
-    public String toString() {
-        return "ParenExpr(" + expression + ")";
-    }
-
-    @Override
     public String pretty(int depth) {
         return indent(depth)
                 + "ParenExpr" + "\n"
-                + expression.pretty(depth + 1);
+                + getExpression().pretty(depth + 1);
     }
 }

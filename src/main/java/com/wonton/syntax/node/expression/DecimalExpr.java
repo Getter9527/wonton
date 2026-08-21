@@ -15,12 +15,7 @@ public class DecimalExpr extends Expr {
     }
 
     @Override
-    public String toString() {
-        return "DecimalExpr(value=" + value + ")";
-    }
-
-    @Override
-    protected String pretty(int depth) {
-        return indent(depth) + "DecimalExpr(" + value + ")";
+    public String pretty(int depth) {
+        return indent(depth) + "DecimalExpr(" + getValue() + ")";
     }
 }

@@ -27,15 +27,10 @@ public class BinaryExpr extends Expr {
     }
 
     @Override
-    public String toString() {
-        return "BinaryExpr(operator=" + operator + ", left=" + left + ", right=" + right + ")";
-    }
-
-    @Override
-    protected String pretty(int depth) {
+    public String pretty(int depth) {
         return indent(depth)
-                + "BinaryExpr(" + operator.getLexeme() + ")" + "\n"
-                + left.pretty(depth + 1) + "\n"
-                + right.pretty(depth + 1);
+                + "BinaryExpr(" + getOperator().getLexeme() + ")" + "\n"
+                + getLeft().pretty(depth + 1) + "\n"
+                + getRight().pretty(depth + 1);
     }
 }

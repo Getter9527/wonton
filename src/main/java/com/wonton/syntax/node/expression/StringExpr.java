@@ -13,12 +13,7 @@ public class StringExpr extends Expr {
     }
 
     @Override
-    public String toString() {
-        return "StringExpr(value=" + value + ")";
-    }
-
-    @Override
-    protected String pretty(int depth) {
-        return "StringExpr(" + value + ")";
+    public String pretty(int depth) {
+        return "StringExpr(" + getValue() + ")";
     }
 }

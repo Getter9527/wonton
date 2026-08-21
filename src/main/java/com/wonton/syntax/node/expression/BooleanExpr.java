@@ -13,12 +13,7 @@ public class BooleanExpr extends Expr {
     }
 
     @Override
-    public String toString() {
-        return "BooleanExpr(value=" + value + ")";
-    }
-
-    @Override
-    protected String pretty(int depth) {
-        return "BooleanExpr(" + value + ")";
+    public String pretty(int depth) {
+        return "BooleanExpr(" + getValue() + ")";
     }
 }

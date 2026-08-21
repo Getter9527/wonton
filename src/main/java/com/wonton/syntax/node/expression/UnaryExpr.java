@@ -21,14 +21,9 @@ public class UnaryExpr extends Expr {
     }
 
     @Override
-    public String toString() {
-        return "UnaryExpr(operator=" + operator + ", operand=" + operand + ")";
-    }
-
-    @Override
     public String pretty(int depth) {
         return indent(depth)
-                + "UnaryExpr(" + operator.getLexeme() + ")" + "\n"
-                + operand.pretty(depth + 1);
+                + "UnaryExpr(" + getOperator().getLexeme() + ")" + "\n"
+                + getOperand().pretty(depth + 1);
     }
 }
