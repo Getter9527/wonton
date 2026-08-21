@@ -19,6 +19,12 @@ public class TreeWalkingInterpreter {
         if (node instanceof DecimalExpr decimalNode) {
             return new Value(RuntimeType.Decimal, decimalNode.getValue());
         }
+        if (node instanceof StringExpr strNode) {
+            return new Value(RuntimeType.String, strNode.getValue());
+        }
+        if (node instanceof BooleanExpr boolNode) {
+            return new Value(RuntimeType.Boolean, boolNode.getValue());
+        }
         if (node instanceof ParenExpr parenNode) {
             return interpret(parenNode.getExpression());
         }
