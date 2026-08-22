@@ -45,6 +45,18 @@ public class Interpreter {
                 // TODO 关于小数位除不尽和取舍的数学问题探讨和解决方案设计
                 return divide(left, right);
             }
+            if (operator == TokenType.Less) {
+                return less(left, right);
+            }
+            if (operator == TokenType.LessEqual) {
+                return lessEqual(left, right);
+            }
+            if (operator == TokenType.Greater) {
+                return greater(left, right);
+            }
+            if (operator == TokenType.GreaterEqual) {
+                return greaterEqual(left, right);
+            }
         }
         if (node instanceof UnaryExpr unaryNode) {
             TokenType operator = unaryNode.getOperator().getType();
@@ -61,6 +73,70 @@ public class Interpreter {
             }
         }
         throw new RuntimeException("未知的语法树节点类型: " + node.getClass().getName());
+    }
+
+    private RuntimeValue less(RuntimeValue left, RuntimeValue right) {
+        if (left.isBoolean() && right.isBoolean()) {
+            Boolean leftValue = toBoolean(left);
+            Boolean rightValue = toBoolean(right);
+            return RuntimeValue.of(leftValue.compareTo(rightValue) < 0);
+        }
+        if (left.isNumeric() && right.isNumeric()) {
+            BigDecimal leftValue = toDecimal(left);
+            BigDecimal rightValue = toDecimal(right);
+            return RuntimeValue.of(leftValue.compareTo(rightValue) < 0);
+        }
+        throw new UnsupportedOperationException(
+                String.format("不支持比较的数据类型。操作类型=less 左操作数=%s 右操作数=%s", left.getValue(), right.getValue())
+        );
+    }
+
+    private RuntimeValue lessEqual(RuntimeValue left, RuntimeValue right) {
+        if (left.isBoolean() && right.isBoolean()) {
+            Boolean leftValue = toBoolean(left);
+            Boolean rightValue = toBoolean(right);
+            return RuntimeValue.of(leftValue.compareTo(rightValue) <= 0);
+        }
+        if (left.isNumeric() && right.isNumeric()) {
+            BigDecimal leftValue = toDecimal(left);
+            BigDecimal rightValue = toDecimal(right);
+            return RuntimeValue.of(leftValue.compareTo(rightValue) <= 0);
+        }
+        throw new UnsupportedOperationException(
+                String.format("不支持比较的数据类型。操作类型=lessEqual 左操作数=%s 右操作数=%s", left.getValue(), right.getValue())
+        );
+    }
+
+    private RuntimeValue greater(RuntimeValue left, RuntimeValue right) {
+        if (left.isBoolean() && right.isBoolean()) {
+            Boolean leftValue = toBoolean(left);
+            Boolean rightValue = toBoolean(right);
+            return RuntimeValue.of(leftValue.compareTo(rightValue) > 0);
+        }
+        if (left.isNumeric() && right.isNumeric()) {
+            BigDecimal leftValue = toDecimal(left);
+            BigDecimal rightValue = toDecimal(right);
+            return RuntimeValue.of(leftValue.compareTo(rightValue) > 0);
+        }
+        throw new UnsupportedOperationException(
+                String.format("不支持比较的数据类型。操作类型=greater 左操作数=%s 右操作数=%s", left.getValue(), right.getValue())
+        );
+    }
+
+    private RuntimeValue greaterEqual(RuntimeValue left, RuntimeValue right) {
+        if (left.isBoolean() && right.isBoolean()) {
+            Boolean leftValue = toBoolean(left);
+            Boolean rightValue = toBoolean(right);
+            return RuntimeValue.of(leftValue.compareTo(rightValue) >= 0);
+        }
+        if (left.isNumeric() && right.isNumeric()) {
+            BigDecimal leftValue = toDecimal(left);
+            BigDecimal rightValue = toDecimal(right);
+            return RuntimeValue.of(leftValue.compareTo(rightValue) >= 0);
+        }
+        throw new UnsupportedOperationException(
+                String.format("不支持比较的数据类型。操作类型=greaterEqual 左操作数=%s 右操作数=%s", left.getValue(), right.getValue())
+        );
     }
 
 
@@ -202,11 +278,6 @@ public class Interpreter {
 
     private boolean isStringOperation(RuntimeValue left, RuntimeValue right) {
         return left.getType().isString() || right.getType().isString();
-    }
-
-
-    private boolean isNullOperation(RuntimeValue operand) {
-        return operand.getType().isNull();
     }
 
     private boolean isNullOperation(RuntimeValue left, RuntimeValue right) {
