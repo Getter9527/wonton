@@ -35,42 +35,74 @@ public class Parser {
     }
 
     public Expr expr() {
-        // <expr> ::= <term> (<op> <term>)*
+        return comparison();
+    }
+
+    /**
+     * 关系运算，比较层
+     * @return expr
+     */
+    public Expr comparison() {
+        // <expr> ::= <comparison> (<op> <comparison>)*
+        // <op> ::= "<" | ">" | "<=" | ">="
+        // 先解析第1个比较数
+        Expr expr = addition();
+        // 匹配比较运算符
+        while (matchAny(TokenType.Less, TokenType.LessEqual, TokenType.Greater, TokenType.GreaterEqual)) {
+            // 获取操作符（<、<=、>、>=）
+            Token operator = previous();
+            // 解析第2个比较数
+            Expr right = multiplication();
+            // 构建关系运算
+            expr = new BinaryExpr(operator, expr, right);
+        }
+        return expr;
+    }
+
+    /**
+     * 加减法
+     * @return comparison(term | factor | unary | primary)
+     */
+    public Expr addition() {
+        // <comparison> ::= <term> (<op> <term>)*
         // <op>   ::= "+" | "-"
         // 先解析首个项（也是左操作数）
-        Expr expr = term();
+        Expr expr = multiplication();
         // 实现左结合的加减运算
         while (matchAny(TokenType.Plus, TokenType.Minus)) {
             // 获取操作符（+、-）
             Token operator = previous();
             // 获取右操作数
-            Expr right = term();
+            Expr right = multiplication();
             // 构建二元表达式
             expr = new BinaryExpr(operator, expr, right);
         }
         return expr;
     }
 
-    public Expr term() {
+    /**
+     * 乘除法
+     * @return term(factor | unary | primary)
+     */
+    public Expr multiplication() {
         // <term> ::= <factor> (<op> <factor>)*
-        // <op>   ::= "*" | "/"
-        Expr expr = factor();
+        // <op>   ::= "×" | "÷"
+        Expr expr = unary();
         while (matchAny(TokenType.Star, TokenType.Slash)) {
             // 获取操作符（*、/）
             Token operator = previous();
             // 获取右操作数
-            Expr right = factor();
+            Expr right = unary();
             // 构建二元表达式
             expr = new BinaryExpr(operator, expr, right);
         }
         return expr;
     }
 
-    public Expr factor() {
-        // <factor> ::= <unary>
-        return unary();
-    }
-
+    /**
+     * 一元运算
+     * @return unary | primary
+     */
     public Expr unary() {
         // <unary>  ::= <op> <unary> | <primary>
         // <op>     ::= "+" | "-" | "~"
@@ -86,10 +118,11 @@ public class Parser {
     }
 
     /**
-     * 基本项，原子量
-     * @description
+     * 基础数据类型、括号
      * <p>primary 是表达式的最小原子单元，不可再被运算符拆分的基本元素，或者是一个被括号包裹的完整子表达式。           </p>
      * <p>括号是 primary 的特殊形式，它的语义是"把子表达式打包成一个整体"，通过递归调用 expr() 解析这个内部的子表达式。</p>
+     *
+     * @return primary
      */
     public Expr primary() {
         // <primary> ::= <integer> | <decimal> | <boolean> | <string> | <paren>
