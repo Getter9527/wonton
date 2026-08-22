@@ -20,6 +20,26 @@ public class RuntimeValue {
         return value;
     }
 
+    public boolean isNumeric() {
+        return type == Type.Integer || type == Type.Decimal;
+    }
+
+    public boolean isInteger() {
+        return type == Type.Integer;
+    }
+
+    public boolean isDecimal() {
+        return type == Type.Decimal;
+    }
+
+    public boolean isBoolean() {
+        return type == Type.Boolean;
+    }
+
+    public boolean isString() {
+        return type == Type.String;
+    }
+
     public static RuntimeValue of(Long value) {
         return new RuntimeValue(Type.Integer, value);
     }
