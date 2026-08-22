@@ -12,6 +12,14 @@ public class RuntimeValue {
         this.value = value;
     }
 
+    public Type getType() {
+        return type;
+    }
+
+    public Object getValue() {
+        return value;
+    }
+
     public static RuntimeValue of(Long value) {
         return new RuntimeValue(Type.Integer, value);
     }
@@ -26,14 +34,6 @@ public class RuntimeValue {
 
     public static RuntimeValue of(String value) {
         return new RuntimeValue(Type.String, value);
-    }
-
-    public Type getType() {
-        return type;
-    }
-
-    public Object getValue() {
-        return value;
     }
 
     @Override
