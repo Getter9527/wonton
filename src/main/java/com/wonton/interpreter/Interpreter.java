@@ -6,6 +6,8 @@ import com.wonton.syntax.node.expression.*;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.util.Arrays;
+import java.util.stream.Stream;
 
 /**
  * 树遍历解释器
@@ -76,12 +78,12 @@ public class Interpreter {
     }
 
     private RuntimeValue less(RuntimeValue left, RuntimeValue right) {
-        if (left.isBoolean() && right.isBoolean()) {
+        if (allBooleans(left, right)) {
             Boolean leftValue = toBoolean(left);
             Boolean rightValue = toBoolean(right);
             return RuntimeValue.of(leftValue.compareTo(rightValue) < 0);
         }
-        if (left.isNumeric() && right.isNumeric()) {
+        if (allNumbers(left, right)) {
             BigDecimal leftValue = toDecimal(left);
             BigDecimal rightValue = toDecimal(right);
             return RuntimeValue.of(leftValue.compareTo(rightValue) < 0);
@@ -92,12 +94,12 @@ public class Interpreter {
     }
 
     private RuntimeValue lessEqual(RuntimeValue left, RuntimeValue right) {
-        if (left.isBoolean() && right.isBoolean()) {
+        if (allBooleans(left, right)) {
             Boolean leftValue = toBoolean(left);
             Boolean rightValue = toBoolean(right);
             return RuntimeValue.of(leftValue.compareTo(rightValue) <= 0);
         }
-        if (left.isNumeric() && right.isNumeric()) {
+        if (allNumbers(left, right)) {
             BigDecimal leftValue = toDecimal(left);
             BigDecimal rightValue = toDecimal(right);
             return RuntimeValue.of(leftValue.compareTo(rightValue) <= 0);
@@ -108,12 +110,12 @@ public class Interpreter {
     }
 
     private RuntimeValue greater(RuntimeValue left, RuntimeValue right) {
-        if (left.isBoolean() && right.isBoolean()) {
+        if (allBooleans(left, right)) {
             Boolean leftValue = toBoolean(left);
             Boolean rightValue = toBoolean(right);
             return RuntimeValue.of(leftValue.compareTo(rightValue) > 0);
         }
-        if (left.isNumeric() && right.isNumeric()) {
+        if (allNumbers(left, right)) {
             BigDecimal leftValue = toDecimal(left);
             BigDecimal rightValue = toDecimal(right);
             return RuntimeValue.of(leftValue.compareTo(rightValue) > 0);
@@ -124,12 +126,12 @@ public class Interpreter {
     }
 
     private RuntimeValue greaterEqual(RuntimeValue left, RuntimeValue right) {
-        if (left.isBoolean() && right.isBoolean()) {
+        if (allBooleans(left, right)) {
             Boolean leftValue = toBoolean(left);
             Boolean rightValue = toBoolean(right);
             return RuntimeValue.of(leftValue.compareTo(rightValue) >= 0);
         }
-        if (left.isNumeric() && right.isNumeric()) {
+        if (allNumbers(left, right)) {
             BigDecimal leftValue = toDecimal(left);
             BigDecimal rightValue = toDecimal(right);
             return RuntimeValue.of(leftValue.compareTo(rightValue) >= 0);
@@ -146,11 +148,11 @@ public class Interpreter {
     }
 
     private RuntimeValue negative(RuntimeValue operand) {
-        if (isIntegerOperation(operand)) {
+        if (operand.isInteger()) {
             Long negateValue = - ((Long) operand.getValue());
             return RuntimeValue.of(negateValue);
         }
-        if (isDecimalOperation(operand)) {
+        if (operand.isDecimal()) {
             BigDecimal negateValue = ((BigDecimal) operand.getValue()).negate();
             return RuntimeValue.of(negateValue);
         }
@@ -158,7 +160,7 @@ public class Interpreter {
     }
 
     private RuntimeValue not(RuntimeValue operand) {
-        if (isBooleanOperation(operand)) {
+        if (operand.isBoolean()) {
             Boolean result = !toBoolean(operand);
             return RuntimeValue.of(result);
         }
@@ -167,23 +169,23 @@ public class Interpreter {
 
     private RuntimeValue add(RuntimeValue left, RuntimeValue right) {
         // 只要有1个操作数是字符串，就进行字符串拼接
-        if (isStringOperation(left, right)) {
+        if (hasString(left, right)) {
             String leftValue = anyToString(left);
             String rightValue = anyToString(right);
             return RuntimeValue.of(leftValue + rightValue);
         }
         // 不合法操作：如果不是字符串，且包含 boolean or null，则报错
-        if (isBooleanOperation(left, right) || isNullOperation(left, right)) {
+        if (hasBoolean(left, right) || hasNullType(left, right)) {
             throw new RuntimeException("不合法的加法运算");
         }
         // 如果都是整数，那么就进行整数加法
-        if (isIntegerOperation(left, right)) {
+        if (allIntegers(left, right)) {
             Long leftValue = (Long) left.getValue();
             Long rightValue = (Long) right.getValue();
             return RuntimeValue.of(leftValue + rightValue);
         }
         // 如果其中1个是小数，那么就进行小数加法
-        if (isDecimalOperation(left, right)) {
+        if (allNumbersWithDecimal(left, right)) {
             BigDecimal leftValue = toDecimal(left);
             BigDecimal rightValue = toDecimal(right);
             BigDecimal result = leftValue.add(rightValue);
@@ -193,15 +195,15 @@ public class Interpreter {
     }
 
     private RuntimeValue subtract(RuntimeValue left, RuntimeValue right) {
-        if (isBooleanOperation(left, right) || isNullOperation(left, right)) {
+        if (hasBoolean(left, right) || hasNullType(left, right)) {
             throw new RuntimeException("不合法的减法运算");
         }
-        if (isIntegerOperation(left, right)) {
+        if (allIntegers(left, right)) {
             Long leftValue = (Long) left.getValue();
             Long rightValue = (Long) right.getValue();
             return RuntimeValue.of(leftValue - rightValue);
         }
-        if (isDecimalOperation(left, right)) {
+        if (allNumbersWithDecimal(left, right)) {
             BigDecimal leftValue = toDecimal(left);
             BigDecimal rightValue = toDecimal(right);
             BigDecimal result = leftValue.subtract(rightValue);
@@ -211,15 +213,15 @@ public class Interpreter {
     }
 
     private RuntimeValue multiply(RuntimeValue left, RuntimeValue right) {
-        if (isBooleanOperation(left, right) || isNullOperation(left, right)) {
+        if (hasBoolean(left, right) || hasNullType(left, right)) {
             throw new RuntimeException("不合法的乘法运算");
         }
-        if (isIntegerOperation(left, right)) {
+        if (allIntegers(left, right)) {
             Long leftValue = (Long) left.getValue();
             Long rightValue = (Long) right.getValue();
             return RuntimeValue.of(leftValue * rightValue);
         }
-        if (isDecimalOperation(left, right)) {
+        if (allNumbersWithDecimal(left, right)) {
             BigDecimal leftValue = toDecimal(left);
             BigDecimal rightValue = toDecimal(right);
             BigDecimal result = leftValue.multiply(rightValue);
@@ -229,15 +231,15 @@ public class Interpreter {
     }
 
     private RuntimeValue divide(RuntimeValue left, RuntimeValue right) {
-        if (isBooleanOperation(left, right) || isNullOperation(left, right)) {
+        if (hasBoolean(left, right) || hasNullType(left, right)) {
             throw new RuntimeException("不合法的除法运算");
         }
-        if (isIntegerOperation(left, right)) {
+        if (allIntegers(left, right)) {
             Long leftValue = (Long) left.getValue();
             Long rightValue = (Long) right.getValue();
             return RuntimeValue.of(leftValue / rightValue);
         }
-        if (isDecimalOperation(left, right)) {
+        if (allNumbersWithDecimal(left, right)) {
             BigDecimal leftValue = toDecimal(left);
             BigDecimal rightValue = toDecimal(right);
             BigDecimal result = leftValue.divide(rightValue, 2, RoundingMode.HALF_UP);
@@ -247,14 +249,13 @@ public class Interpreter {
     }
 
     private String anyToString(RuntimeValue value) {
-        RuntimeValue.Type runtimeType = value.getType();
-        if (runtimeType.isNull()) {
+        if (value.isNullType()) {
             return "null";
         }
-        if (runtimeType.isBoolean() || runtimeType.isInteger()) {
+        if (value.isBoolean()|| value.isInteger()) {
             return String.valueOf(value.getValue());
         }
-        if (runtimeType.isDecimal()) {
+        if (value.isDecimal()) {
             // 去掉多余的尾零，并避免科学计数法
             return ((BigDecimal) value.getValue()).stripTrailingZeros().toPlainString();
         }
@@ -262,55 +263,83 @@ public class Interpreter {
     }
 
     private Boolean toBoolean(RuntimeValue value) {
-        return switch (value.getType()) {
-            case Boolean -> (Boolean) value.getValue();
-            default -> throw new RuntimeException("不是布尔类型: " + value.getClass().getName());
-        };
+        if (value.isBoolean()) {
+            return (Boolean) value.getValue();
+        }
+        throw new RuntimeException("不是布尔类型: " + value.getClass().getName());
     }
 
     private BigDecimal toDecimal(RuntimeValue value) {
-        return switch (value.getType()) {
-            case Decimal -> (BigDecimal) value.getValue();
-            case Integer -> BigDecimal.valueOf((Long) value.getValue());
-            default -> throw new RuntimeException("不是数值类型: " + value.getClass().getName());
-        };
+        if (value.isDecimal()) {
+            return (BigDecimal) value.getValue();
+        }
+        if (value.isInteger()) {
+            return BigDecimal.valueOf( (Long) value.getValue() );
+        }
+        throw new RuntimeException("不是数值类型: " + value.getClass().getName());
     }
 
-    private boolean isStringOperation(RuntimeValue left, RuntimeValue right) {
-        return left.getType().isString() || right.getType().isString();
+    public <T> Stream<T> toSafeStream(T[] array) {
+        if (array == null) {
+            return Stream.empty();
+        }
+        return Arrays.stream(array);
     }
 
-    private boolean isNullOperation(RuntimeValue left, RuntimeValue right) {
-        return left.getType().isNull() || right.getType().isNull();
+    /**
+     * 包含至少1个字符串类型，其它类型不做限制
+     */
+    private boolean hasString(RuntimeValue... values) {
+        return toSafeStream(values).anyMatch(RuntimeValue::isString);
     }
 
-
-    private boolean isBooleanOperation(RuntimeValue operand) {
-        return operand.getType().isBoolean();
+    /**
+     * 包含至少1个Null类型，其它类型不做限制
+     */
+    private boolean hasNullType(RuntimeValue... values) {
+        return toSafeStream(values).anyMatch(RuntimeValue::isNullType);
     }
 
-    private boolean isBooleanOperation(RuntimeValue left, RuntimeValue right) {
-        return left.getType().isBoolean() || right.getType().isBoolean();
+    /**
+     * 包含至少1个布尔类型，其它类型不做限制
+     */
+    private boolean hasBoolean(RuntimeValue... values) {
+        return toSafeStream(values).anyMatch(RuntimeValue::isBoolean);
     }
 
-
-    private boolean isIntegerOperation(RuntimeValue operand) {
-        return operand.getType().isInteger();
+    /**
+     * 包含至少1个小数类型，其它类型不做限制
+     */
+    private boolean hasDecimal(RuntimeValue... values) {
+        return toSafeStream(values).anyMatch(RuntimeValue::isDecimal);
     }
 
-    private boolean isIntegerOperation(RuntimeValue left, RuntimeValue right) {
-        return left.getType().isInteger() && right.getType().isInteger();
+    /**
+     * 都是布尔类型
+     */
+    private boolean allBooleans(RuntimeValue... values) {
+        return toSafeStream(values).allMatch(RuntimeValue::isBoolean);
     }
 
-
-    private boolean isDecimalOperation(RuntimeValue operand) {
-        return operand.getType().isDecimal();
+    /**
+     * 都是整数类型
+     */
+    private boolean allIntegers(RuntimeValue... values) {
+        return toSafeStream(values).allMatch(RuntimeValue::isInteger);
     }
 
-    private boolean isDecimalOperation(RuntimeValue left, RuntimeValue right) {
+    /**
+     * 都是数值类型
+     */
+    private boolean allNumbers(RuntimeValue... values) {
+        return toSafeStream(values).allMatch(RuntimeValue::isNumbers);
+    }
+
+    /**
+     * 都是数值类型，且其中有一个是小数
+     */
+    private boolean allNumbersWithDecimal(RuntimeValue... values) {
         // 如果都是数值类型，且其中有一个是小数
-        boolean isNumeric = left.getType().isNumeric() && right.getType().isNumeric();
-        boolean hasDecimal = left.getType().isDecimal() || right.getType().isDecimal();
-        return isNumeric && hasDecimal;
+        return allNumbers(values) && hasDecimal(values);
     }
 }
