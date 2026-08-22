@@ -20,7 +20,7 @@ public class RuntimeValue {
         return value;
     }
 
-    public boolean isNumeric() {
+    public boolean isNumbers() {
         return type == Type.Integer || type == Type.Decimal;
     }
 
@@ -38,6 +38,10 @@ public class RuntimeValue {
 
     public boolean isString() {
         return type == Type.String;
+    }
+
+    public boolean isNullType() {
+        return type == Type.Null;
     }
 
     public static RuntimeValue of(Long value) {
@@ -61,32 +65,8 @@ public class RuntimeValue {
         return String.format("RuntimeValue(type: %s, value: %s)", type, value);
     }
 
-    public static enum Type {
+    public enum Type {
         Integer, Decimal, String, Boolean, Null;
-
-        public boolean isNumeric() {
-            return this == Integer || this == Decimal;
-        }
-
-        public boolean isInteger() {
-            return this == Integer;
-        }
-
-        public boolean isDecimal() {
-            return this == Decimal;
-        }
-
-        public boolean isBoolean() {
-            return this == Boolean;
-        }
-
-        public boolean isString() {
-            return this == String;
-        }
-
-        public boolean isNull() {
-            return this == Null;
-        }
     }
 
 }
