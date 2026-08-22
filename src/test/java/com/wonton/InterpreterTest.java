@@ -1,6 +1,7 @@
 package com.wonton;
 
 import com.wonton.interpreter.TreeWalkingInterpreter;
+import com.wonton.interpreter.Value;
 import com.wonton.lexical.Lexer;
 import com.wonton.lexical.Token;
 import com.wonton.logger.Logger;
@@ -28,7 +29,31 @@ public class InterpreterTest {
 
         // 解释执行
         TreeWalkingInterpreter interpreter = new TreeWalkingInterpreter();
-        Object result = interpreter.interpret(ast);
+        Value result = interpreter.interpret(ast);
+        Logger.success("结果: {0}", result);
+    }
+
+    @Test
+    public void testStringExpression() {
+        // 源代码
+        String source = FileUtils.readSource("scripts/string_expression.wonton");
+        Logger.debug("源代码: {0}", source);
+
+        // tokens
+        Lexer lexer = new Lexer(source);
+        List<Token> tokens = lexer.tokenize();
+        for (var i = 0; i < tokens.size(); i++) {
+            Logger.debug("序号: {0} {1}", String.format("%-6s", i+1), tokens.get(i));
+        }
+
+        // 语法树
+        Parser parser = new Parser(tokens);
+        Node ast = parser.parse();
+        Logger.debug("\n" + ast.toPrettyString());
+
+        // 解释执行
+        TreeWalkingInterpreter interpreter = new TreeWalkingInterpreter();
+        Value result = interpreter.interpret(ast);
         Logger.success("结果: {0}", result);
     }
 }

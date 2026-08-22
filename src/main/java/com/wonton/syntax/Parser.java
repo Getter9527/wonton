@@ -78,7 +78,7 @@ public class Parser {
             // 获取操作符（+、-、~）
             Token operator = previous();
             // 右侧的操作数本身可能也是一个一元表达式，所以这里递归
-            Expr operand = unary();
+            Expr operand = unary(); // TODO 如果是不合法的连续一元操作，这里还真不好处理，直接逻辑判断是不好使的
             return new UnaryExpr(operator, operand);
         }
         // 当没有匹配到一元运算符时，不再递归

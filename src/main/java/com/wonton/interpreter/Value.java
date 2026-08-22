@@ -17,4 +17,9 @@ public class Value {
     public Object getValue() {
         return value;
     }
+
+    @Override
+    public String toString() {
+        return String.format("Value(runtimeType: %s, value: %s)", runtimeType, value);
+    }
 }
