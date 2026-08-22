@@ -52,7 +52,7 @@ public class Parser {
             // 获取操作符（<、<=、>、>=）
             Token operator = previous();
             // 解析第2个比较数
-            Expr right = multiplication();
+            Expr right = addition();
             // 构建关系运算
             expr = new BinaryExpr(operator, expr, right);
         }
