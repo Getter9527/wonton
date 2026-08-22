@@ -10,7 +10,7 @@ import java.math.RoundingMode;
 /**
  * 树遍历解释器
  */
-public class TreeWalkingInterpreter {
+public class Interpreter {
 
     public RuntimeValue interpret(Node node) {
         if(node instanceof IntegerExpr intNode) {

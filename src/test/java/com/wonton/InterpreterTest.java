@@ -1,7 +1,7 @@
 package com.wonton;
 
+import com.wonton.interpreter.Interpreter;
 import com.wonton.interpreter.RuntimeValue;
-import com.wonton.interpreter.TreeWalkingInterpreter;
 import com.wonton.lexical.Lexer;
 import com.wonton.lexical.Token;
 import com.wonton.logger.Logger;
@@ -28,7 +28,7 @@ public class InterpreterTest {
         Node ast = parser.parse();
 
         // 解释执行
-        TreeWalkingInterpreter interpreter = new TreeWalkingInterpreter();
+        Interpreter interpreter = new Interpreter();
         RuntimeValue result = interpreter.interpret(ast);
         Logger.success("结果: {0}", result);
     }
@@ -52,7 +52,7 @@ public class InterpreterTest {
         Logger.debug("\n" + ast.toPrettyString());
 
         // 解释执行
-        TreeWalkingInterpreter interpreter = new TreeWalkingInterpreter();
+        Interpreter interpreter = new Interpreter();
         RuntimeValue result = interpreter.interpret(ast);
         Logger.success("结果: {0}", result);
     }
