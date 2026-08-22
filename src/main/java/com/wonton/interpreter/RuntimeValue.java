@@ -1,11 +1,11 @@
 package com.wonton.interpreter;
 
-public class Value {
+public class RuntimeValue {
 
     private final RuntimeType runtimeType;
     private final Object value;
 
-    public Value(RuntimeType runtimeType, Object value) {
+    public RuntimeValue(RuntimeType runtimeType, Object value) {
         this.runtimeType = runtimeType;
         this.value = value;
     }

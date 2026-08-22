@@ -12,26 +12,26 @@ import java.math.RoundingMode;
  */
 public class TreeWalkingInterpreter {
 
-    public Value interpret(Node node) {
+    public RuntimeValue interpret(Node node) {
         if(node instanceof IntegerExpr intNode) {
-            return new Value(RuntimeType.Integer, intNode.getValue());
+            return new RuntimeValue(RuntimeType.Integer, intNode.getValue());
         }
         if (node instanceof DecimalExpr decimalNode) {
-            return new Value(RuntimeType.Decimal, decimalNode.getValue());
+            return new RuntimeValue(RuntimeType.Decimal, decimalNode.getValue());
         }
         if (node instanceof StringExpr strNode) {
-            return new Value(RuntimeType.String, strNode.getValue());
+            return new RuntimeValue(RuntimeType.String, strNode.getValue());
         }
         if (node instanceof BooleanExpr boolNode) {
-            return new Value(RuntimeType.Boolean, boolNode.getValue());
+            return new RuntimeValue(RuntimeType.Boolean, boolNode.getValue());
         }
         if (node instanceof ParenExpr parenNode) {
             return interpret(parenNode.getExpression());
         }
         if (node instanceof BinaryExpr binNode) {
             TokenType operator = binNode.getOperator().getType();
-            Value left = interpret(binNode.getLeft());
-            Value right = interpret(binNode.getRight());
+            RuntimeValue left = interpret(binNode.getLeft());
+            RuntimeValue right = interpret(binNode.getRight());
             if (operator == TokenType.Plus) {
                 return add(left, right);
             }
@@ -48,7 +48,7 @@ public class TreeWalkingInterpreter {
         }
         if (node instanceof UnaryExpr unaryNode) {
             TokenType operator = unaryNode.getOperator().getType();
-            Value operand = interpret(unaryNode.getOperand());
+            RuntimeValue operand = interpret(unaryNode.getOperand());
             if (operator == TokenType.Plus) {
                 return positive(operand);
             }
@@ -64,37 +64,37 @@ public class TreeWalkingInterpreter {
     }
 
 
-    private Value positive(Value operand) {
+    private RuntimeValue positive(RuntimeValue operand) {
         // 恒等的，原样返回即可（目前还没想到有什么特殊操作）
         return operand;
     }
 
-    private Value negative(Value operand) {
+    private RuntimeValue negative(RuntimeValue operand) {
         if (isIntegerOperation(operand)) {
             var negateValue = - ((Long) operand.getValue());
-            return new Value(operand.getRuntimeType(), negateValue);
+            return new RuntimeValue(operand.getRuntimeType(), negateValue);
         }
         if (isDecimalOperation(operand)) {
             var negateValue = ((BigDecimal) operand.getValue()).negate();
-            return new Value(operand.getRuntimeType(), negateValue);
+            return new RuntimeValue(operand.getRuntimeType(), negateValue);
         }
         throw new UnsupportedOperationException("不支持的操作数：" + operand.getRuntimeType());
     }
 
-    private Value not(Value operand) {
+    private RuntimeValue not(RuntimeValue operand) {
         if (isBooleanOperation(operand)) {
             Boolean result = !toBoolean(operand);
-            return new Value(RuntimeType.Boolean, result);
+            return new RuntimeValue(RuntimeType.Boolean, result);
         }
         throw new UnsupportedOperationException("不支持的操作数：" + operand.getRuntimeType());
     }
 
-    private Value add(Value left, Value right) {
+    private RuntimeValue add(RuntimeValue left, RuntimeValue right) {
         // 只要有1个操作数是字符串，就进行字符串拼接
         if (isStringOperation(left, right)) {
             String leftValue = anyToString(left);
             String rightValue = anyToString(right);
-            return new Value(RuntimeType.String, leftValue + rightValue);
+            return new RuntimeValue(RuntimeType.String, leftValue + rightValue);
         }
         // 不合法操作：如果不是字符串，且包含 boolean or null，则报错
         if (isBooleanOperation(left, right) || isNullOperation(left, right)) {
@@ -104,73 +104,73 @@ public class TreeWalkingInterpreter {
         if (isIntegerOperation(left, right)) {
             Long leftValue = (Long) left.getValue();
             Long rightValue = (Long) right.getValue();
-            return new Value(RuntimeType.Integer, leftValue + rightValue);
+            return new RuntimeValue(RuntimeType.Integer, leftValue + rightValue);
         }
         // 如果其中1个是小数，那么就进行小数加法
         if (isDecimalOperation(left, right)) {
             BigDecimal leftValue = toDecimal(left);
             BigDecimal rightValue = toDecimal(right);
             BigDecimal result = leftValue.add(rightValue);
-            return new Value(RuntimeType.Decimal, result);
+            return new RuntimeValue(RuntimeType.Decimal, result);
         }
         throw new RuntimeException("未知的运算类型: " + left.getRuntimeType() + " " + right.getRuntimeType());
     }
 
-    private Value subtract(Value left, Value right) {
+    private RuntimeValue subtract(RuntimeValue left, RuntimeValue right) {
         if (isBooleanOperation(left, right) || isNullOperation(left, right)) {
             throw new RuntimeException("不合法的减法运算");
         }
         if (isIntegerOperation(left, right)) {
             Long leftValue = (Long) left.getValue();
             Long rightValue = (Long) right.getValue();
-            return new Value(RuntimeType.Integer, leftValue - rightValue);
+            return new RuntimeValue(RuntimeType.Integer, leftValue - rightValue);
         }
         if (isDecimalOperation(left, right)) {
             BigDecimal leftValue = toDecimal(left);
             BigDecimal rightValue = toDecimal(right);
             BigDecimal result = leftValue.subtract(rightValue);
-            return new Value(RuntimeType.Decimal, result);
+            return new RuntimeValue(RuntimeType.Decimal, result);
         }
         throw new RuntimeException("未知的运算类型: " + left.getRuntimeType() + " " + right.getRuntimeType());
     }
 
-    private Value multiply(Value left, Value right) {
+    private RuntimeValue multiply(RuntimeValue left, RuntimeValue right) {
         if (isBooleanOperation(left, right) || isNullOperation(left, right)) {
             throw new RuntimeException("不合法的乘法运算");
         }
         if (isIntegerOperation(left, right)) {
             Long leftValue = (Long) left.getValue();
             Long rightValue = (Long) right.getValue();
-            return new Value(RuntimeType.Integer, leftValue * rightValue);
+            return new RuntimeValue(RuntimeType.Integer, leftValue * rightValue);
         }
         if (isDecimalOperation(left, right)) {
             BigDecimal leftValue = toDecimal(left);
             BigDecimal rightValue = toDecimal(right);
             BigDecimal result = leftValue.multiply(rightValue);
-            return new Value(RuntimeType.Decimal, result);
+            return new RuntimeValue(RuntimeType.Decimal, result);
         }
         throw new RuntimeException("未知的运算类型: " + left.getRuntimeType() + " " + right.getRuntimeType());
     }
 
-    private Value divide(Value left, Value right) {
+    private RuntimeValue divide(RuntimeValue left, RuntimeValue right) {
         if (isBooleanOperation(left, right) || isNullOperation(left, right)) {
             throw new RuntimeException("不合法的除法运算");
         }
         if (isIntegerOperation(left, right)) {
             Long leftValue = (Long) left.getValue();
             Long rightValue = (Long) right.getValue();
-            return new Value(RuntimeType.Integer, leftValue / rightValue);
+            return new RuntimeValue(RuntimeType.Integer, leftValue / rightValue);
         }
         if (isDecimalOperation(left, right)) {
             BigDecimal leftValue = toDecimal(left);
             BigDecimal rightValue = toDecimal(right);
             BigDecimal result = leftValue.divide(rightValue, 2, RoundingMode.HALF_UP);
-            return new Value(RuntimeType.Decimal, result);
+            return new RuntimeValue(RuntimeType.Decimal, result);
         }
         throw new RuntimeException("未知的运算类型: " + left.getRuntimeType() + " " + right.getRuntimeType());
     }
 
-    private String anyToString(Value value) {
+    private String anyToString(RuntimeValue value) {
         RuntimeType runtimeType = value.getRuntimeType();
         if (runtimeType == RuntimeType.Null) {
             return "null";
@@ -185,14 +185,14 @@ public class TreeWalkingInterpreter {
         return String.valueOf(value.getValue());
     }
 
-    private Boolean toBoolean(Value value) {
+    private Boolean toBoolean(RuntimeValue value) {
         return switch (value.getRuntimeType()) {
             case Boolean -> (Boolean) value.getValue();
             default -> throw new RuntimeException("不是布尔类型: " + value.getClass().getName());
         };
     }
 
-    private BigDecimal toDecimal(Value value) {
+    private BigDecimal toDecimal(RuntimeValue value) {
         return switch (value.getRuntimeType()) {
             case Decimal -> (BigDecimal) value.getValue();
             case Integer -> BigDecimal.valueOf((Long) value.getValue());
@@ -200,43 +200,43 @@ public class TreeWalkingInterpreter {
         };
     }
 
-    private boolean isStringOperation(Value left, Value right) {
+    private boolean isStringOperation(RuntimeValue left, RuntimeValue right) {
         return left.getRuntimeType() == RuntimeType.String || right.getRuntimeType() == RuntimeType.String;
     }
 
 
-    private boolean isNullOperation(Value operand) {
+    private boolean isNullOperation(RuntimeValue operand) {
         return operand.getRuntimeType() == RuntimeType.Null;
     }
 
-    private boolean isNullOperation(Value left, Value right) {
+    private boolean isNullOperation(RuntimeValue left, RuntimeValue right) {
         return left.getRuntimeType() == RuntimeType.Null || right.getRuntimeType() == RuntimeType.Null;
     }
 
 
-    private boolean isBooleanOperation(Value operand) {
+    private boolean isBooleanOperation(RuntimeValue operand) {
         return operand.getRuntimeType() == RuntimeType.Boolean;
     }
 
-    private boolean isBooleanOperation(Value left, Value right) {
+    private boolean isBooleanOperation(RuntimeValue left, RuntimeValue right) {
         return left.getRuntimeType() == RuntimeType.Boolean || right.getRuntimeType() == RuntimeType.Boolean;
     }
 
 
-    private boolean isIntegerOperation(Value operand) {
+    private boolean isIntegerOperation(RuntimeValue operand) {
         return operand.getRuntimeType() == RuntimeType.Integer;
     }
 
-    private boolean isIntegerOperation(Value left, Value right) {
+    private boolean isIntegerOperation(RuntimeValue left, RuntimeValue right) {
         return left.getRuntimeType() == RuntimeType.Integer && right.getRuntimeType() == RuntimeType.Integer;
     }
 
 
-    private boolean isDecimalOperation(Value operand) {
+    private boolean isDecimalOperation(RuntimeValue operand) {
         return operand.getRuntimeType() == RuntimeType.Decimal;
     }
 
-    private boolean isDecimalOperation(Value left, Value right) {
+    private boolean isDecimalOperation(RuntimeValue left, RuntimeValue right) {
         // 如果都是数值类型，且其中有一个是小数
         return RuntimeType.isNumber(left.getRuntimeType())
                 && RuntimeType.isNumber(right.getRuntimeType())
