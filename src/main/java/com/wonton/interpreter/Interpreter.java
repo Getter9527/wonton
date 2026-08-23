@@ -77,6 +77,13 @@ public class Interpreter {
                 return notEquality(left, right);
             }
 
+            if (operator == TokenType.And) {
+                return and(left, right);
+            }
+            if (operator == TokenType.Or) {
+                return or(left, right);
+            }
+
         }
         if (node instanceof UnaryExpr unaryNode) {
             TokenType operator = unaryNode.getOperator().getType();
@@ -93,6 +100,28 @@ public class Interpreter {
             }
         }
         throw new RuntimeException("未知的语法树节点类型: " + node.getClass().getName());
+    }
+
+    private RuntimeValue or(RuntimeValue left, RuntimeValue right) {
+        if (allBooleans(left, right)) {
+            Boolean leftValue = (Boolean) left.getValue();
+            Boolean rightValue = (Boolean) right.getValue();
+            return RuntimeValue.of(leftValue || rightValue);
+        }
+        throw new UnsupportedOperationException(
+                String.format("不支持比较的数据类型。操作类型=or 左操作数=%s 右操作数=%s", left.getValue(), right.getValue())
+        );
+    }
+
+    private RuntimeValue and(RuntimeValue left, RuntimeValue right) {
+        if (allBooleans(left, right)) {
+            Boolean leftValue = (Boolean) left.getValue();
+            Boolean rightValue = (Boolean) right.getValue();
+            return RuntimeValue.of(leftValue && rightValue);
+        }
+        throw new UnsupportedOperationException(
+                String.format("不支持比较的数据类型。操作类型=and 左操作数=%s 右操作数=%s", left.getValue(), right.getValue())
+        );
     }
 
     private RuntimeValue less(RuntimeValue left, RuntimeValue right) {

@@ -35,15 +35,46 @@ public class Parser {
     }
 
     public Expr expr() {
-        return equality();
+        return logicalOr();
+    }
+
+    /**
+     * 逻辑或
+     * @return expr
+     */
+    public Expr logicalOr() {
+        // <expr> ::= <or> ("or" <or>)*
+        Expr expr = logicalAnd();
+        while (matchAny(TokenType.Or)) {
+            Token operator = previous();
+            Expr right = logicalAnd();
+            // 左结合律：expr = (left or right) or right
+            expr = new BinaryExpr(operator, expr, right);
+        }
+        return expr;
+    }
+
+    /**
+     * 逻辑与
+     * @return or
+     */
+    public Expr logicalAnd() {
+        // <or> ::= <and> ("and" <and>)*
+        Expr expr = equality();
+        while (matchAny(TokenType.And)) {
+            Token operator = previous();
+            Expr right = equality();
+            expr = new BinaryExpr(operator, expr, right);
+        }
+        return expr;
     }
 
     /**
      * 相等、不相等
-     * @return expr
+     * @return and
      */
     public Expr equality() {
-        // <expr> ::= <equality> (<op> <equality>)*
+        // <and> ::= <equality> (<op> <equality>)*
         // <op> ::= "=" | "!="
         // 先解析第1个比较数
         Expr expr = comparison();
@@ -132,6 +163,7 @@ public class Parser {
             // TODO 如果是不合法的连续一元操作，这里还真不好处理，直接逻辑判断是不好使的
             // 右侧的操作数本身可能也是一个一元表达式，所以这里采用右递归文法（从右向左结合）
             Expr operand = unary();
+            // 右结合律：unary = -(-operand)
             return new UnaryExpr(operator, operand);
         }
         // 当没有匹配到一元运算符时，不再递归

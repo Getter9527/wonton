@@ -8,9 +8,7 @@ public enum TokenType {
     Minus,              // -
     Star,               // *
     Slash,              // /
-    Dot,                // .
-    Comma,              // ,
-    Semicolon,          // ;
+
     Equal,              // =
     Equalx2,            // ==
     Not,                // !
@@ -19,12 +17,20 @@ public enum TokenType {
     GreaterEqual,       // >=
     Less,               // <
     LessEqual,          // <=
+
     LeftParen,          // (
     RightParen,         // )
     LeftBracket,        // [
     RightBracket,       // ]
     LeftBrace,          // {
     RightBrace,         // }
+
+    Dot,                // .
+    Comma,              // ,
+    Semicolon,          // ;
+
+    And,
+    Or,
 
     Identifier,
     If,

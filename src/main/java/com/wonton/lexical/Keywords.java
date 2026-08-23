@@ -22,6 +22,8 @@ public class Keywords {
         keywords.put("print", TokenType.Print);
         keywords.put("println", TokenType.Println);
         keywords.put("null", TokenType.Null);
+        keywords.put("and", TokenType.And);
+        keywords.put("or", TokenType.Or);
     }
 
     public static TokenType getType(String lexeme) {
