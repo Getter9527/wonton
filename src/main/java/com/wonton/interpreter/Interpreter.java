@@ -71,10 +71,10 @@ public class Interpreter {
             }
 
             if (operator == TokenType.Equalx2) {
-                return eq(left, right);
+                return equality(left, right);
             }
             if (operator == TokenType.NotEqual) {
-                return neq(left, right);
+                return notEquality(left, right);
             }
 
         }
@@ -159,7 +159,7 @@ public class Interpreter {
         );
     }
 
-    private RuntimeValue eq(RuntimeValue left, RuntimeValue right) {
+    private RuntimeValue equality(RuntimeValue left, RuntimeValue right) {
         if (allStrings(left, right)) {
             String leftValue = (String) left.getValue();
             String rightValue = (String) right.getValue();
@@ -180,7 +180,7 @@ public class Interpreter {
         );
     }
 
-    private RuntimeValue neq(RuntimeValue left, RuntimeValue right) {
+    private RuntimeValue notEquality(RuntimeValue left, RuntimeValue right) {
         if (allStrings(left, right)) {
             String leftValue = (String) left.getValue();
             String rightValue = (String) right.getValue();
