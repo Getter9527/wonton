@@ -78,9 +78,9 @@ public class Interpreter {
     }
 
     private RuntimeValue less(RuntimeValue left, RuntimeValue right) {
-        if (allBooleans(left, right)) {
-            Boolean leftValue = toBoolean(left);
-            Boolean rightValue = toBoolean(right);
+        if (allStrings(left, right)) {
+            String leftValue = (String) left.getValue();
+            String rightValue = (String) right.getValue();
             return RuntimeValue.of(leftValue.compareTo(rightValue) < 0);
         }
         if (allNumbers(left, right)) {
@@ -94,9 +94,9 @@ public class Interpreter {
     }
 
     private RuntimeValue lessEqual(RuntimeValue left, RuntimeValue right) {
-        if (allBooleans(left, right)) {
-            Boolean leftValue = toBoolean(left);
-            Boolean rightValue = toBoolean(right);
+        if (allStrings(left, right)) {
+            String leftValue = (String) left.getValue();
+            String rightValue = (String) right.getValue();
             return RuntimeValue.of(leftValue.compareTo(rightValue) <= 0);
         }
         if (allNumbers(left, right)) {
@@ -110,9 +110,9 @@ public class Interpreter {
     }
 
     private RuntimeValue greater(RuntimeValue left, RuntimeValue right) {
-        if (allBooleans(left, right)) {
-            Boolean leftValue = toBoolean(left);
-            Boolean rightValue = toBoolean(right);
+        if (allStrings(left, right)) {
+            String leftValue = (String) left.getValue();
+            String rightValue = (String) right.getValue();
             return RuntimeValue.of(leftValue.compareTo(rightValue) > 0);
         }
         if (allNumbers(left, right)) {
@@ -126,9 +126,9 @@ public class Interpreter {
     }
 
     private RuntimeValue greaterEqual(RuntimeValue left, RuntimeValue right) {
-        if (allBooleans(left, right)) {
-            Boolean leftValue = toBoolean(left);
-            Boolean rightValue = toBoolean(right);
+        if (allStrings(left, right)) {
+            String leftValue = (String) left.getValue();
+            String rightValue = (String) right.getValue();
             return RuntimeValue.of(leftValue.compareTo(rightValue) >= 0);
         }
         if (allNumbers(left, right)) {
@@ -248,6 +248,9 @@ public class Interpreter {
         throw new RuntimeException("未知的运算类型: " + left.getType() + " " + right.getType());
     }
 
+    /**
+     * 任意类型的值都可以转字符串
+     */
     private String anyToString(RuntimeValue value) {
         if (value.isNullType()) {
             return "null";
@@ -312,6 +315,13 @@ public class Interpreter {
      */
     private boolean hasDecimal(RuntimeValue... values) {
         return toSafeStream(values).anyMatch(RuntimeValue::isDecimal);
+    }
+
+    /**
+     * 都是字符串类型
+     */
+    private boolean allStrings(RuntimeValue... values) {
+        return toSafeStream(values).allMatch(RuntimeValue::isString);
     }
 
     /**
