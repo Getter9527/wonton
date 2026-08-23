@@ -14,6 +14,6 @@ public class BooleanExpr extends Expr {
 
     @Override
     public String pretty(int depth) {
-        return "BooleanExpr(" + getValue() + ")";
+        return indent(depth) + "BooleanExpr(" + getValue() + ")";
     }
 }

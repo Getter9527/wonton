@@ -14,6 +14,6 @@ public class StringExpr extends Expr {
 
     @Override
     public String pretty(int depth) {
-        return "StringExpr(" + getValue() + ")";
+        return indent(depth) + "StringExpr(" + getValue() + ")";
     }
 }
