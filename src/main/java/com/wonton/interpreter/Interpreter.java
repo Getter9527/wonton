@@ -84,6 +84,10 @@ public class Interpreter {
                 return or(left, right);
             }
 
+            if (operator == TokenType.Modulo) {
+                return modulo(left, right);
+            }
+
         }
         if (node instanceof UnaryExpr unaryNode) {
             TokenType operator = unaryNode.getOperator().getType();
@@ -102,6 +106,17 @@ public class Interpreter {
         throw new RuntimeException("未知的语法树节点类型: " + node.getClass().getName());
     }
 
+    private RuntimeValue modulo(RuntimeValue left, RuntimeValue right) {
+        if (allNumbers(left, right)) {
+            BigDecimal leftValue = anyToDecimal(left);
+            BigDecimal rightValue = anyToDecimal(right);
+            return RuntimeValue.of(leftValue.remainder(rightValue));
+        }
+        throw new UnsupportedOperationException(
+                String.format("不支持的数据类型。操作类型=modulo 左操作数=%s 右操作数=%s", left.getValue(), right.getValue())
+        );
+    }
+
     private RuntimeValue or(RuntimeValue left, RuntimeValue right) {
         if (allBooleans(left, right)) {
             Boolean leftValue = (Boolean) left.getValue();
@@ -109,7 +124,7 @@ public class Interpreter {
             return RuntimeValue.of(leftValue || rightValue);
         }
         throw new UnsupportedOperationException(
-                String.format("不支持比较的数据类型。操作类型=or 左操作数=%s 右操作数=%s", left.getValue(), right.getValue())
+                String.format("不支持的数据类型。操作类型=or 左操作数=%s 右操作数=%s", left.getValue(), right.getValue())
         );
     }
 
@@ -120,7 +135,7 @@ public class Interpreter {
             return RuntimeValue.of(leftValue && rightValue);
         }
         throw new UnsupportedOperationException(
-                String.format("不支持比较的数据类型。操作类型=and 左操作数=%s 右操作数=%s", left.getValue(), right.getValue())
+                String.format("不支持的数据类型。操作类型=and 左操作数=%s 右操作数=%s", left.getValue(), right.getValue())
         );
     }
 
@@ -136,7 +151,7 @@ public class Interpreter {
             return RuntimeValue.of(leftValue.compareTo(rightValue) < 0);
         }
         throw new UnsupportedOperationException(
-                String.format("不支持比较的数据类型。操作类型=less 左操作数=%s 右操作数=%s", left.getValue(), right.getValue())
+                String.format("不支持的数据类型。操作类型=Less 左操作数=%s 右操作数=%s", left.getValue(), right.getValue())
         );
     }
 
@@ -152,7 +167,7 @@ public class Interpreter {
             return RuntimeValue.of(leftValue.compareTo(rightValue) <= 0);
         }
         throw new UnsupportedOperationException(
-                String.format("不支持比较的数据类型。操作类型=lessEqual 左操作数=%s 右操作数=%s", left.getValue(), right.getValue())
+                String.format("不支持的数据类型。操作类型=LessEqual 左操作数=%s 右操作数=%s", left.getValue(), right.getValue())
         );
     }
 
@@ -168,7 +183,7 @@ public class Interpreter {
             return RuntimeValue.of(leftValue.compareTo(rightValue) > 0);
         }
         throw new UnsupportedOperationException(
-                String.format("不支持比较的数据类型。操作类型=greater 左操作数=%s 右操作数=%s", left.getValue(), right.getValue())
+                String.format("不支持的数据类型。操作类型=Greater 左操作数=%s 右操作数=%s", left.getValue(), right.getValue())
         );
     }
 
@@ -184,7 +199,7 @@ public class Interpreter {
             return RuntimeValue.of(leftValue.compareTo(rightValue) >= 0);
         }
         throw new UnsupportedOperationException(
-            String.format("不支持比较的数据类型。操作类型=greaterEqual 左操作数=%s 右操作数=%s", left.getValue(), right.getValue())
+            String.format("不支持的数据类型。操作类型=GreaterEqual 左操作数=%s 右操作数=%s", left.getValue(), right.getValue())
         );
     }
 
@@ -205,7 +220,7 @@ public class Interpreter {
             return RuntimeValue.of(leftValue.compareTo(rightValue) == 0);
         }
         throw new UnsupportedOperationException(
-            String.format("不支持比较的数据类型。操作类型=Equalx2 左操作数=%s 右操作数=%s", left.getValue(), right.getValue())
+            String.format("不支持的数据类型。操作类型=Equalx2 左操作数=%s 右操作数=%s", left.getValue(), right.getValue())
         );
     }
 
@@ -226,7 +241,7 @@ public class Interpreter {
             return RuntimeValue.of(leftValue.compareTo(rightValue) != 0);
         }
         throw new UnsupportedOperationException(
-            String.format("不支持比较的数据类型。操作类型=NotEqual 左操作数=%s 右操作数=%s", left.getValue(), right.getValue())
+            String.format("不支持的数据类型。操作类型=NotEqual 左操作数=%s 右操作数=%s", left.getValue(), right.getValue())
         );
     }
 

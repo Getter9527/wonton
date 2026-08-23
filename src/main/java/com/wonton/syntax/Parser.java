@@ -138,16 +138,30 @@ public class Parser {
     public Expr multiplication() {
         // <term> ::= <factor> (<op> <factor>)*
         // <op>   ::= "×" | "÷"
-        Expr expr = unary();
+        Expr expr = modulo();
         while (matchAny(TokenType.Star, TokenType.Slash)) {
             // 获取操作符（*、/）
             Token operator = previous();
             // 获取右操作数
-            Expr right = unary();
+            Expr right = modulo();
             // 构建二元表达式
             expr = new BinaryExpr(operator, expr, right);
         }
         return expr;
+    }
+
+    /**
+     * 取模运算
+     * @return factor
+     */
+    public Expr modulo() {
+        Expr left = unary();
+        while (matchAny(TokenType.Modulo)) {
+            Token operator = previous();
+            Expr right = unary();
+            left = new BinaryExpr(operator, left, right);
+        }
+        return left;
     }
 
     /**
@@ -156,9 +170,9 @@ public class Parser {
      */
     public Expr unary() {
         // <unary>  ::= <op> <unary> | <primary>
-        // <op>     ::= "+" | "-" | "~"
+        // <op>     ::= "+" | "-" | "!"
         if (matchAny(TokenType.Plus, TokenType.Minus, TokenType.Not)) {
-            // 获取操作符（+、-、~）
+            // 获取操作符（+、-、!）
             Token operator = previous();
             // TODO 如果是不合法的连续一元操作，这里还真不好处理，直接逻辑判断是不好使的
             // 右侧的操作数本身可能也是一个一元表达式，所以这里采用右递归文法（从右向左结合）

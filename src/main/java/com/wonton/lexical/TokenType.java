@@ -28,6 +28,7 @@ public enum TokenType {
     Dot,                // .
     Comma,              // ,
     Semicolon,          // ;
+    Modulo,             // %
 
     And,
     Or,
