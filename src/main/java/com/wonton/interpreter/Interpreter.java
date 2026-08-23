@@ -18,28 +18,29 @@ public class Interpreter {
         if(node instanceof IntegerExpr intNode) {
             return RuntimeValue.of(intNode.getValue());
         }
+
         if (node instanceof DecimalExpr decimalNode) {
             return RuntimeValue.of(decimalNode.getValue());
         }
+
         if (node instanceof StringExpr strNode) {
             return RuntimeValue.of(strNode.getValue());
         }
+
         if (node instanceof BooleanExpr boolNode) {
             return RuntimeValue.of(boolNode.getValue());
         }
+
         if (node instanceof ParenExpr parenNode) {
             return interpret(parenNode.getExpression());
         }
+
         if (node instanceof BinaryExpr binNode) {
+
             TokenType operator = binNode.getOperator().getType();
             RuntimeValue left = interpret(binNode.getLeft());
             RuntimeValue right = interpret(binNode.getRight());
-            if (operator == TokenType.Plus) {
-                return add(left, right);
-            }
-            if (operator == TokenType.Minus) {
-                return subtract(left, right);
-            }
+
             if (operator == TokenType.Star) {
                 return multiply(left, right);
             }
@@ -47,6 +48,15 @@ public class Interpreter {
                 // TODO 关于小数位除不尽和取舍的数学问题探讨和解决方案设计
                 return divide(left, right);
             }
+
+            if (operator == TokenType.Plus) {
+                return add(left, right);
+            }
+            if (operator == TokenType.Minus) {
+                return subtract(left, right);
+            }
+
+
             if (operator == TokenType.Less) {
                 return less(left, right);
             }
@@ -59,6 +69,14 @@ public class Interpreter {
             if (operator == TokenType.GreaterEqual) {
                 return greaterEqual(left, right);
             }
+
+            if (operator == TokenType.Equalx2) {
+                return eq(left, right);
+            }
+            if (operator == TokenType.NotEqual) {
+                return neq(left, right);
+            }
+
         }
         if (node instanceof UnaryExpr unaryNode) {
             TokenType operator = unaryNode.getOperator().getType();
@@ -84,8 +102,8 @@ public class Interpreter {
             return RuntimeValue.of(leftValue.compareTo(rightValue) < 0);
         }
         if (allNumbers(left, right)) {
-            BigDecimal leftValue = toDecimal(left);
-            BigDecimal rightValue = toDecimal(right);
+            BigDecimal leftValue = anyToDecimal(left);
+            BigDecimal rightValue = anyToDecimal(right);
             return RuntimeValue.of(leftValue.compareTo(rightValue) < 0);
         }
         throw new UnsupportedOperationException(
@@ -100,8 +118,8 @@ public class Interpreter {
             return RuntimeValue.of(leftValue.compareTo(rightValue) <= 0);
         }
         if (allNumbers(left, right)) {
-            BigDecimal leftValue = toDecimal(left);
-            BigDecimal rightValue = toDecimal(right);
+            BigDecimal leftValue = anyToDecimal(left);
+            BigDecimal rightValue = anyToDecimal(right);
             return RuntimeValue.of(leftValue.compareTo(rightValue) <= 0);
         }
         throw new UnsupportedOperationException(
@@ -116,8 +134,8 @@ public class Interpreter {
             return RuntimeValue.of(leftValue.compareTo(rightValue) > 0);
         }
         if (allNumbers(left, right)) {
-            BigDecimal leftValue = toDecimal(left);
-            BigDecimal rightValue = toDecimal(right);
+            BigDecimal leftValue = anyToDecimal(left);
+            BigDecimal rightValue = anyToDecimal(right);
             return RuntimeValue.of(leftValue.compareTo(rightValue) > 0);
         }
         throw new UnsupportedOperationException(
@@ -132,12 +150,54 @@ public class Interpreter {
             return RuntimeValue.of(leftValue.compareTo(rightValue) >= 0);
         }
         if (allNumbers(left, right)) {
-            BigDecimal leftValue = toDecimal(left);
-            BigDecimal rightValue = toDecimal(right);
+            BigDecimal leftValue = anyToDecimal(left);
+            BigDecimal rightValue = anyToDecimal(right);
             return RuntimeValue.of(leftValue.compareTo(rightValue) >= 0);
         }
         throw new UnsupportedOperationException(
-                String.format("不支持比较的数据类型。操作类型=greaterEqual 左操作数=%s 右操作数=%s", left.getValue(), right.getValue())
+            String.format("不支持比较的数据类型。操作类型=greaterEqual 左操作数=%s 右操作数=%s", left.getValue(), right.getValue())
+        );
+    }
+
+    private RuntimeValue eq(RuntimeValue left, RuntimeValue right) {
+        if (allStrings(left, right)) {
+            String leftValue = (String) left.getValue();
+            String rightValue = (String) right.getValue();
+            return RuntimeValue.of(leftValue.equals(rightValue));
+        }
+        if (allBooleans(left, right)) {
+            boolean leftValue = (boolean) left.getValue();
+            boolean rightValue = (boolean) right.getValue();
+            return RuntimeValue.of(leftValue == rightValue);
+        }
+        if (allNumbers(left, right)) {
+            BigDecimal leftValue = anyToDecimal(left);
+            BigDecimal rightValue = anyToDecimal(right);
+            return RuntimeValue.of(leftValue.compareTo(rightValue) == 0);
+        }
+        throw new UnsupportedOperationException(
+            String.format("不支持比较的数据类型。操作类型=Equalx2 左操作数=%s 右操作数=%s", left.getValue(), right.getValue())
+        );
+    }
+
+    private RuntimeValue neq(RuntimeValue left, RuntimeValue right) {
+        if (allStrings(left, right)) {
+            String leftValue = (String) left.getValue();
+            String rightValue = (String) right.getValue();
+            return RuntimeValue.of(!leftValue.equals(rightValue));
+        }
+        if (allBooleans(left, right)) {
+            boolean leftValue = (boolean) left.getValue();
+            boolean rightValue = (boolean) right.getValue();
+            return RuntimeValue.of(leftValue != rightValue);
+        }
+        if (allNumbers(left, right)) {
+            BigDecimal leftValue = anyToDecimal(left);
+            BigDecimal rightValue = anyToDecimal(right);
+            return RuntimeValue.of(leftValue.compareTo(rightValue) != 0);
+        }
+        throw new UnsupportedOperationException(
+            String.format("不支持比较的数据类型。操作类型=NotEqual 左操作数=%s 右操作数=%s", left.getValue(), right.getValue())
         );
     }
 
@@ -161,7 +221,7 @@ public class Interpreter {
 
     private RuntimeValue not(RuntimeValue operand) {
         if (operand.isBoolean()) {
-            Boolean result = !toBoolean(operand);
+            Boolean result = !anyToBoolean(operand);
             return RuntimeValue.of(result);
         }
         throw new UnsupportedOperationException("不支持的操作数：" + operand.getType());
@@ -185,9 +245,9 @@ public class Interpreter {
             return RuntimeValue.of(leftValue + rightValue);
         }
         // 如果其中1个是小数，那么就进行小数加法
-        if (allNumbersWithDecimal(left, right)) {
-            BigDecimal leftValue = toDecimal(left);
-            BigDecimal rightValue = toDecimal(right);
+        if (allNumbers(left, right) && hasDecimal(left, right)) {
+            BigDecimal leftValue = anyToDecimal(left);
+            BigDecimal rightValue = anyToDecimal(right);
             BigDecimal result = leftValue.add(rightValue);
             return RuntimeValue.of(result);
         }
@@ -203,9 +263,9 @@ public class Interpreter {
             Long rightValue = (Long) right.getValue();
             return RuntimeValue.of(leftValue - rightValue);
         }
-        if (allNumbersWithDecimal(left, right)) {
-            BigDecimal leftValue = toDecimal(left);
-            BigDecimal rightValue = toDecimal(right);
+        if (allNumbers(left, right) && hasDecimal(left, right)) {
+            BigDecimal leftValue = anyToDecimal(left);
+            BigDecimal rightValue = anyToDecimal(right);
             BigDecimal result = leftValue.subtract(rightValue);
             return RuntimeValue.of(result);
         }
@@ -221,9 +281,9 @@ public class Interpreter {
             Long rightValue = (Long) right.getValue();
             return RuntimeValue.of(leftValue * rightValue);
         }
-        if (allNumbersWithDecimal(left, right)) {
-            BigDecimal leftValue = toDecimal(left);
-            BigDecimal rightValue = toDecimal(right);
+        if (allNumbers(left, right) && hasDecimal(left, right)) {
+            BigDecimal leftValue = anyToDecimal(left);
+            BigDecimal rightValue = anyToDecimal(right);
             BigDecimal result = leftValue.multiply(rightValue);
             return RuntimeValue.of(result);
         }
@@ -239,9 +299,9 @@ public class Interpreter {
             Long rightValue = (Long) right.getValue();
             return RuntimeValue.of(leftValue / rightValue);
         }
-        if (allNumbersWithDecimal(left, right)) {
-            BigDecimal leftValue = toDecimal(left);
-            BigDecimal rightValue = toDecimal(right);
+        if (allNumbers(left, right) && hasDecimal(left, right)) {
+            BigDecimal leftValue = anyToDecimal(left);
+            BigDecimal rightValue = anyToDecimal(right);
             BigDecimal result = leftValue.divide(rightValue, 2, RoundingMode.HALF_UP);
             return RuntimeValue.of(result);
         }
@@ -249,7 +309,10 @@ public class Interpreter {
     }
 
     /**
-     * 任意类型的值都可以转字符串
+     * 转换为字符串类型
+     * <p>在非确定性转换时的场景下使用<p/>
+     * @param value 非确定性类型
+     * @return 字符串类型
      */
     private String anyToString(RuntimeValue value) {
         if (value.isNullType()) {
@@ -265,14 +328,26 @@ public class Interpreter {
         return String.valueOf(value.getValue());
     }
 
-    private Boolean toBoolean(RuntimeValue value) {
+    /**
+     * 转换为布尔类型
+     * <p>在非确定性转换时的场景下使用<p/>
+     * @param value 非确定性类型
+     * @return 布尔类型
+     */
+    private Boolean anyToBoolean(RuntimeValue value) {
         if (value.isBoolean()) {
             return (Boolean) value.getValue();
         }
         throw new RuntimeException("不是布尔类型: " + value.getClass().getName());
     }
 
-    private BigDecimal toDecimal(RuntimeValue value) {
+    /**
+     * 转换为小数类型
+     * <p>在非确定性转换时的场景下使用<p/>
+     * @param value 非确定性类型
+     * @return 小数类型
+     */
+    private BigDecimal anyToDecimal(RuntimeValue value) {
         if (value.isDecimal()) {
             return (BigDecimal) value.getValue();
         }
@@ -345,11 +420,4 @@ public class Interpreter {
         return toSafeStream(values).allMatch(RuntimeValue::isNumbers);
     }
 
-    /**
-     * 都是数值类型，且其中有一个是小数
-     */
-    private boolean allNumbersWithDecimal(RuntimeValue... values) {
-        // 如果都是数值类型，且其中有一个是小数
-        return allNumbers(values) && hasDecimal(values);
-    }
 }
