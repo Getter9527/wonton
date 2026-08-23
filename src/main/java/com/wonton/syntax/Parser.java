@@ -129,8 +129,9 @@ public class Parser {
         if (matchAny(TokenType.Plus, TokenType.Minus, TokenType.Not)) {
             // 获取操作符（+、-、~）
             Token operator = previous();
-            // 右侧的操作数本身可能也是一个一元表达式，所以这里递归
-            Expr operand = unary(); // TODO 如果是不合法的连续一元操作，这里还真不好处理，直接逻辑判断是不好使的
+            // TODO 如果是不合法的连续一元操作，这里还真不好处理，直接逻辑判断是不好使的
+            // 右侧的操作数本身可能也是一个一元表达式，所以这里采用右递归文法（从右向左结合）
+            Expr operand = unary();
             return new UnaryExpr(operator, operand);
         }
         // 当没有匹配到一元运算符时，不再递归
