@@ -35,7 +35,27 @@ public class Parser {
     }
 
     public Expr expr() {
-        return comparison();
+        return equality();
+    }
+
+    /**
+     * 相等、不相等
+     * @return expr
+     */
+    public Expr equality() {
+        // <expr> ::= <equality> (<op> <equality>)*
+        // <op> ::= "=" | "!="
+        // 先解析第1个比较数
+        Expr expr = comparison();
+        while (matchAny(TokenType.Equalx2, TokenType.NotEqual)) {
+            // 获取操作符（=、!=）
+            Token operator = previous();
+            // 解析第2个比较数
+            Expr right = comparison();
+            // 构建关系运算
+            expr = new BinaryExpr(operator, expr, right);
+        }
+        return expr;
     }
 
     /**
@@ -43,7 +63,7 @@ public class Parser {
      * @return expr
      */
     public Expr comparison() {
-        // <expr> ::= <comparison> (<op> <comparison>)*
+        // <equality> ::= <comparison> (<op> <comparison>)*
         // <op> ::= "<" | ">" | "<=" | ">="
         // 先解析第1个比较数
         Expr expr = addition();
