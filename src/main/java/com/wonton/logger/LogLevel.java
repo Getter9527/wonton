@@ -18,7 +18,7 @@ public enum LogLevel {
 
     public String getHexColor() {
         return switch (this) {
-            case DEBUG -> "#909399";
+            case DEBUG -> "#303133";
             case INFO -> "#909399";
             case PRIMARY -> "#409EFF";
             case WARN -> "#E6A23C";
