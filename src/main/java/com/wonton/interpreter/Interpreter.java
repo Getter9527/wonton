@@ -114,17 +114,6 @@ public class Interpreter {
         throw new RuntimeException("未知的语法树节点类型: " + node.getClass().getName());
     }
 
-    private RuntimeValue modulo(RuntimeValue left, RuntimeValue right) {
-        if (allNumbers(left, right)) {
-            BigDecimal leftValue = anyToDecimal(left);
-            BigDecimal rightValue = anyToDecimal(right);
-            return RuntimeValue.of(leftValue.remainder(rightValue));
-        }
-        throw new UnsupportedOperationException(
-                String.format("不支持的数据类型。操作类型=modulo 左操作数=%s 右操作数=%s", left.getValue(), right.getValue())
-        );
-    }
-
     private RuntimeValue or(RuntimeValue left, RuntimeValue right) {
         if (allBooleans(left, right)) {
             Boolean leftValue = (Boolean) left.getValue();
@@ -140,10 +129,22 @@ public class Interpreter {
         if (allBooleans(left, right)) {
             Boolean leftValue = (Boolean) left.getValue();
             Boolean rightValue = (Boolean) right.getValue();
+            // 短路与（Short-circuit evaluation）
             return RuntimeValue.of(leftValue && rightValue);
         }
         throw new UnsupportedOperationException(
                 String.format("不支持的数据类型。操作类型=and 左操作数=%s 右操作数=%s", left.getValue(), right.getValue())
+        );
+    }
+
+    private RuntimeValue modulo(RuntimeValue left, RuntimeValue right) {
+        if (allNumbers(left, right)) {
+            BigDecimal leftValue = anyToDecimal(left);
+            BigDecimal rightValue = anyToDecimal(right);
+            return RuntimeValue.of(leftValue.remainder(rightValue));
+        }
+        throw new UnsupportedOperationException(
+                String.format("不支持的数据类型。操作类型=modulo 左操作数=%s 右操作数=%s", left.getValue(), right.getValue())
         );
     }
 
