@@ -155,13 +155,13 @@ public class Parser {
      * @return factor
      */
     public Expr modulo() {
-        Expr left = unary();
+        Expr expr = unary();
         while (matchAny(TokenType.Modulo)) {
             Token operator = previous();
             Expr right = unary();
-            left = new BinaryExpr(operator, left, right);
+            expr = new BinaryExpr(operator, expr, right);
         }
-        return left;
+        return expr;
     }
 
     /**
