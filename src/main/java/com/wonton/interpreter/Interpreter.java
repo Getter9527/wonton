@@ -35,6 +35,21 @@ public class Interpreter {
             return interpret(parenNode.getExpression());
         }
 
+        if (node instanceof UnaryExpr unaryNode) {
+            TokenType operator = unaryNode.getOperator().getType();
+            RuntimeValue operand = interpret(unaryNode.getOperand());
+            if (operator == TokenType.Plus) {
+                return positive(operand);
+            }
+            if (operator == TokenType.Minus) {
+                // 相反数（取反）
+                return negative(operand);
+            }
+            if (operator == TokenType.Not) {
+                return not(operand);
+            }
+        }
+
         if (node instanceof BinaryExpr binNode) {
 
             TokenType operator = binNode.getOperator().getType();
@@ -77,32 +92,25 @@ public class Interpreter {
                 return notEquality(left, right);
             }
 
+            if (operator == TokenType.Modulo) {
+                return modulo(left, right);
+            }
+        }
+
+        if (node instanceof LogicalExpr logicalNode) {
+
+            TokenType operator = logicalNode.getOperator().getType();
+            RuntimeValue left = interpret(logicalNode.getLeft());
+            RuntimeValue right = interpret(logicalNode.getRight());
+
             if (operator == TokenType.And) {
                 return and(left, right);
             }
             if (operator == TokenType.Or) {
                 return or(left, right);
             }
-
-            if (operator == TokenType.Modulo) {
-                return modulo(left, right);
-            }
-
         }
-        if (node instanceof UnaryExpr unaryNode) {
-            TokenType operator = unaryNode.getOperator().getType();
-            RuntimeValue operand = interpret(unaryNode.getOperand());
-            if (operator == TokenType.Plus) {
-                return positive(operand);
-            }
-            if (operator == TokenType.Minus) {
-                // 相反数（取反）
-                return negative(operand);
-            }
-            if (operator == TokenType.Not) {
-                return not(operand);
-            }
-        }
+
         throw new RuntimeException("未知的语法树节点类型: " + node.getClass().getName());
     }
 

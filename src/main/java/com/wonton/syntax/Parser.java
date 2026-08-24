@@ -49,7 +49,7 @@ public class Parser {
             Token operator = previous();
             Expr right = logicalAnd();
             // 左结合律：expr = (left or right) or right
-            expr = new BinaryExpr(operator, expr, right);
+            expr = new LogicalExpr(operator, expr, right);
         }
         return expr;
     }
@@ -64,7 +64,7 @@ public class Parser {
         while (matchAny(TokenType.And)) {
             Token operator = previous();
             Expr right = equality();
-            expr = new BinaryExpr(operator, expr, right);
+            expr = new LogicalExpr(operator, expr, right);
         }
         return expr;
     }
