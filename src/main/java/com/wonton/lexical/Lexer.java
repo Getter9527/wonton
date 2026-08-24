@@ -113,6 +113,7 @@ public class Lexer {
             else if(ch == '{') addToken(TokenType.LeftBrace);
             else if(ch == '}') addToken(TokenType.RightBrace);
             else if(ch == '%') addToken(TokenType.Modulo);
+            else if(ch == '^') addToken(TokenType.Caret);
             else {
                 // TODO throw new RuntimeException("代码中存在不支持的字符，在什么什么附近");
                 System.err.printf("警告：未知字符【%s】，需要完善语法支持", ch);

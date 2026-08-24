@@ -169,7 +169,7 @@ public class Parser {
      * @return unary | primary
      */
     public Expr unary() {
-        // <unary>  ::= <op> <unary> | <primary>
+        // <unary>  ::= <op> <unary> | <exponent>
         // <op>     ::= "+" | "-" | "!"
         if (matchAny(TokenType.Plus, TokenType.Minus, TokenType.Not)) {
             // 获取操作符（+、-、!）
@@ -181,7 +181,22 @@ public class Parser {
             return new UnaryExpr(operator, operand);
         }
         // 当没有匹配到一元运算符时，不再递归
-        return primary();
+        return exponent();
+    }
+
+    /**
+     * 指数运算
+     * @return exponent
+     */
+    public Expr exponent() {
+        // TODO 目前不支持 2 ^ -3 ^ 4，中间出现一元运算的这种情况
+        Expr expr = primary();
+        while (matchAny(TokenType.Caret)) {
+            Token operator = previous();
+            Expr right = exponent(); // 右结合
+            expr = new BinaryExpr(operator, expr, right);
+        }
+        return expr;
     }
 
     /**

@@ -29,6 +29,7 @@ public enum TokenType {
     Comma,              // ,
     Semicolon,          // ;
     Modulo,             // %
+    Caret,              // ^
 
     And,
     Or,

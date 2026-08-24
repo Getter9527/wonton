@@ -95,6 +95,10 @@ public class Interpreter {
             if (operator == TokenType.Modulo) {
                 return modulo(left, right);
             }
+
+            if (operator == TokenType.Caret) {
+                return exponent(left, right);
+            }
         }
 
         if (node instanceof LogicalExpr logicalNode) {
@@ -152,6 +156,18 @@ public class Interpreter {
         }
         throw new UnsupportedOperationException(
                 String.format("不支持的数据类型。操作类型=modulo 左操作数=%s 右操作数=%s", left.getValue(), right.getValue())
+        );
+    }
+
+    private RuntimeValue exponent(RuntimeValue left, RuntimeValue right) {
+        if (allNumbers(left, right)) {
+            double leftValue = anyToDecimal(left).doubleValue();
+            double rightValue = anyToDecimal(right).doubleValue();
+            double result = Math.pow(leftValue, rightValue);
+            return RuntimeValue.of(BigDecimal.valueOf(result));
+        }
+        throw new UnsupportedOperationException(
+                String.format("不支持的数据类型。操作类型=exponent 左操作数=%s 右操作数=%s", left.getValue(), right.getValue())
         );
     }
 
