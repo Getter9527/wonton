@@ -34,7 +34,7 @@ public class Parser {
         return ast;
     }
 
-    public Expr expr() {
+    private Expr expr() {
         return logicalOr();
     }
 
@@ -42,7 +42,7 @@ public class Parser {
      * 逻辑或
      * @return expr
      */
-    public Expr logicalOr() {
+    private Expr logicalOr() {
         // <expr> ::= <or> ("or" <or>)*
         Expr expr = logicalAnd();
         while (matchAny(TokenType.Or)) {
@@ -58,7 +58,7 @@ public class Parser {
      * 逻辑与
      * @return or
      */
-    public Expr logicalAnd() {
+    private Expr logicalAnd() {
         // <or> ::= <and> ("and" <and>)*
         Expr expr = equality();
         while (matchAny(TokenType.And)) {
@@ -73,7 +73,7 @@ public class Parser {
      * 相等、不相等
      * @return and
      */
-    public Expr equality() {
+    private Expr equality() {
         // <and> ::= <equality> (<op> <equality>)*
         // <op> ::= "=" | "!="
         // 先解析第1个比较数
@@ -93,7 +93,7 @@ public class Parser {
      * 关系运算，比较层
      * @return expr
      */
-    public Expr comparison() {
+    private Expr comparison() {
         // <equality> ::= <comparison> (<op> <comparison>)*
         // <op> ::= "<" | ">" | "<=" | ">="
         // 先解析第1个比较数
@@ -114,7 +114,7 @@ public class Parser {
      * 加减法
      * @return comparison(term | factor | unary | primary)
      */
-    public Expr addition() {
+    private Expr addition() {
         // <comparison> ::= <term> (<op> <term>)*
         // <op>   ::= "+" | "-"
         // 先解析首个项（也是左操作数）
@@ -135,7 +135,7 @@ public class Parser {
      * 乘除法
      * @return term(factor | unary | primary)
      */
-    public Expr multiplication() {
+    private Expr multiplication() {
         // <term> ::= <factor> (<op> <factor>)*
         // <op>   ::= "×" | "÷"
         Expr expr = modulo();
@@ -154,7 +154,7 @@ public class Parser {
      * 取模运算
      * @return factor
      */
-    public Expr modulo() {
+    private Expr modulo() {
         Expr expr = unary();
         while (matchAny(TokenType.Modulo)) {
             Token operator = previous();
@@ -168,7 +168,7 @@ public class Parser {
      * 一元运算
      * @return unary | primary
      */
-    public Expr unary() {
+    private Expr unary() {
         // <unary>  ::= <op> <unary> | <exponent>
         // <op>     ::= "+" | "-" | "!"
         if (matchAny(TokenType.Plus, TokenType.Minus, TokenType.Not)) {
@@ -188,7 +188,7 @@ public class Parser {
      * 指数运算
      * @return exponent
      */
-    public Expr exponent() {
+    private Expr exponent() {
         // TODO 目前不支持 2 ^ -3 ^ 4，中间出现一元运算的这种情况
         Expr expr = primary();
         while (matchAny(TokenType.Caret)) {
@@ -206,7 +206,7 @@ public class Parser {
      *
      * @return primary
      */
-    public Expr primary() {
+    private Expr primary() {
         // <primary> ::= <integer> | <decimal> | <boolean> | <string> | <paren>
         // <boolean>::= "true" | "false"
         // <paren>  ::= "(" <expr> ")"
@@ -242,14 +242,14 @@ public class Parser {
     /**
      * 获取当前正在处理的 Token
      */
-    public Token peek() {
+    private Token peek() {
         return tokens.get(current);
     }
 
     /**
      * 获取上一个 Token信息
      */
-    public Token previous() {
+    private Token previous() {
         return tokens.get(current - 1);
     }
 
@@ -257,7 +257,7 @@ public class Parser {
      * 推进 Token
      * @description 获取当前正在处理的 Token，并向后推进
      */
-    public Token advance() {
+    private Token advance() {
         Token token = tokens.get(current);
         current++;
         return token;
@@ -267,7 +267,7 @@ public class Parser {
      * 匹配 Token
      * @description 匹配当前 Token 是否为指定类型，如果是则消费之；否则不消费
      */
-    public boolean match(TokenType type) {
+    private boolean match(TokenType type) {
         if (current >= tokens.size()) {
             return false;
         }
@@ -283,7 +283,7 @@ public class Parser {
      * 匹配任意一个（或多个） Token
      * @description 如果有任意一个（或多个）Token被匹配上，则消费之；否则不消费
      */
-    public boolean matchAny(TokenType ...types) {
+    private boolean matchAny(TokenType ...types) {
         if (current >= tokens.size()) {
             return false;
         }
@@ -297,7 +297,7 @@ public class Parser {
         return false;
     }
 
-    public boolean isCurrent(TokenType type) {
+    private boolean isCurrent(TokenType type) {
         // 防止获取下一个元素时，下坐标越界
         if (current >= tokens.size()) {
             return false;
@@ -306,7 +306,7 @@ public class Parser {
         return token.getType() == type;
     }
 
-    public Token expect(TokenType type) {
+    private Token expect(TokenType type) {
         // 防止获取下一个元素时，下坐标越界
         if (current >= tokens.size()) {
             Token token = previous();
