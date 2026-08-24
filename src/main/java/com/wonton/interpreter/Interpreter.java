@@ -100,40 +100,47 @@ public class Interpreter {
         if (node instanceof LogicalExpr logicalNode) {
 
             TokenType operator = logicalNode.getOperator().getType();
-            RuntimeValue left = interpret(logicalNode.getLeft());
-            RuntimeValue right = interpret(logicalNode.getRight());
 
             if (operator == TokenType.And) {
-                return and(left, right);
+                return and(logicalNode.getLeft(), logicalNode.getRight());
             }
             if (operator == TokenType.Or) {
-                return or(left, right);
+                return or(logicalNode.getLeft(), logicalNode.getRight());
             }
         }
 
         throw new RuntimeException("未知的语法树节点类型: " + node.getClass().getName());
     }
 
-    private RuntimeValue or(RuntimeValue left, RuntimeValue right) {
-        if (allBooleans(left, right)) {
-            Boolean leftValue = (Boolean) left.getValue();
-            Boolean rightValue = (Boolean) right.getValue();
-            return RuntimeValue.of(leftValue || rightValue);
+    private RuntimeValue or(Expr left, Expr right) {
+        RuntimeValue leftRuntimeVal = interpret(left);
+        // 我们要求左值必须是布尔类型
+        if (leftRuntimeVal.isBoolean()) {
+            Boolean leftValue = (Boolean) leftRuntimeVal.getValue();
+            // 两者满足其一即可
+            if (leftValue) {
+                return leftRuntimeVal;
+            }
+            // 当左值为false，必须向后求右值
+            return interpret(right);
         }
         throw new UnsupportedOperationException(
-                String.format("不支持的数据类型。操作类型=or 左操作数=%s 右操作数=%s", left.getValue(), right.getValue())
+                String.format("不支持的数据类型。操作类型=or 左操作数=%s", leftRuntimeVal.getValue())
         );
     }
 
-    private RuntimeValue and(RuntimeValue left, RuntimeValue right) {
-        if (allBooleans(left, right)) {
-            Boolean leftValue = (Boolean) left.getValue();
-            Boolean rightValue = (Boolean) right.getValue();
-            // 短路与（Short-circuit evaluation）
-            return RuntimeValue.of(leftValue && rightValue);
+    private RuntimeValue and(Expr left, Expr right) {
+        RuntimeValue leftRuntimeVal = interpret(left);
+        if (leftRuntimeVal.isBoolean()) {
+            Boolean leftValue = (Boolean) leftRuntimeVal.getValue();
+            // 前者不满足，后者也无需计算
+            if (!leftValue) {
+                return leftRuntimeVal;
+            }
+            return interpret(right);
         }
         throw new UnsupportedOperationException(
-                String.format("不支持的数据类型。操作类型=and 左操作数=%s 右操作数=%s", left.getValue(), right.getValue())
+                String.format("不支持的数据类型。操作类型=and 左操作数=%s", leftRuntimeVal.getValue())
         );
     }
 
