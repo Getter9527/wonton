@@ -5,9 +5,7 @@ import com.wonton.lexical.TokenType;
 import com.wonton.logger.Logger;
 import com.wonton.syntax.node.Node;
 import com.wonton.syntax.node.expression.*;
-import com.wonton.syntax.node.statement.PrintStmt;
-import com.wonton.syntax.node.statement.Stmt;
-import com.wonton.syntax.node.statement.Stmts;
+import com.wonton.syntax.node.statement.*;
 
 import java.math.BigDecimal;
 import java.text.MessageFormat;
@@ -46,8 +44,9 @@ public class Parser {
 
     private Stmts stmts() {
         List<Stmt> stmtList = new ArrayList<>();
-        // TODO 目前的实现是把所有的token都消费作为一个句子了，事实上我们需要考虑多个句子的构成，例如句子的开始和结束
+        // 只要有未消费的tokens，那么就继续消费
         while (current < tokens.size()) {
+            // 按照句子去消费 tokens
             Stmt stmt = stmt();
             stmtList.add(stmt);
         }
@@ -74,17 +73,31 @@ public class Parser {
                 return functionDeclaration();
             }
         }
+        parseError(MessageFormat.format("意外的符号，无法解析为语句：{0}", token.getLexeme()), token.getLine());
         return null;
     }
 
     private Stmt printStmt() {
         consume(TokenType.Print);
         Expr value = expr();
+        consume(TokenType.Semicolon);
         return new PrintStmt(value);
     }
 
     private Stmt ifStmt() {
-        return null;
+        consume(TokenType.If);
+        Expr condition = expr();
+        if (condition == null) {
+            parseError("if 后面缺少条件表达式", previous().getLine());
+        }
+        BlockStmt ifBlock = blockStmt();
+        // 仅if语句
+        if (!match(TokenType.Else)) {
+            return new IfStmt(condition, ifBlock, null);
+        }
+        // if...else语句
+        BlockStmt elseBlock = blockStmt();
+        return new IfStmt(condition, ifBlock, elseBlock);
     }
 
     private Stmt whileStmt() {
@@ -97,6 +110,24 @@ public class Parser {
 
     private Stmt functionDeclaration() {
         return null;
+    }
+
+    private BlockStmt blockStmt() {
+        if (!match(TokenType.LeftBrace)) {
+            throw new RuntimeException("缺少左大括号：{");
+        }
+        List<Stmt> stmtList = new ArrayList<>();
+        // 遇到右大括号或 token 耗尽时停止，右大括号留给本方法末尾统一消费和校验
+        while (current < tokens.size()) {
+            if (peek().getType() == TokenType.RightBrace) {
+                break;
+            }
+            stmtList.add(stmt());
+        }
+        if (!match(TokenType.RightBrace)) {
+            throw new RuntimeException("语句块未闭合，缺少右大括号：}");
+        }
+        return new BlockStmt(stmtList);
     }
 
     private Expr expr() {
@@ -335,7 +366,7 @@ public class Parser {
         if (match(type)) {
             return;
         }
-        parseError("Unexpected token", previous().getLine());
+        parseError("期望TokenType:" + type, previous().getLine());
     }
 
     /**
@@ -370,15 +401,6 @@ public class Parser {
             }
         }
         return false;
-    }
-
-    private boolean isCurrent(TokenType type) {
-        // 防止获取下一个元素时，下坐标越界
-        if (current >= tokens.size()) {
-            return false;
-        }
-        Token token = peek();
-        return token.getType() == type;
     }
 
     private Token expect(TokenType type) {

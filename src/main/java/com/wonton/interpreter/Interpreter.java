@@ -3,9 +3,7 @@ package com.wonton.interpreter;
 import com.wonton.lexical.TokenType;
 import com.wonton.syntax.node.Node;
 import com.wonton.syntax.node.expression.*;
-import com.wonton.syntax.node.statement.PrintStmt;
-import com.wonton.syntax.node.statement.Stmt;
-import com.wonton.syntax.node.statement.Stmts;
+import com.wonton.syntax.node.statement.*;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -128,6 +126,32 @@ public class Interpreter {
             // print的值有可能是一个表达式，因此需要被解释成运行时值
             RuntimeValue printRuntimeVal = interpret(printNode.getValue());
             System.out.print(printRuntimeVal.getValue());
+            return RuntimeValue.ofVoid();
+        }
+
+        if (node instanceof IfStmt ifNode) {
+            RuntimeValue condition = interpret(ifNode.getCondition());
+            if (!condition.isBoolean()) {
+                throw new RuntimeException("条件表达式必须返回布尔值");
+            }
+            boolean conditionValue = (boolean) condition.getValue();
+            // if
+            if (conditionValue) {
+                return interpret(ifNode.getIfBlock());
+            }
+            // else
+            if (ifNode.getElseBlock() != null) {
+                return interpret(ifNode.getElseBlock());
+            }
+            // 如果没有走进if也没有走进else
+            return RuntimeValue.ofVoid();
+        }
+
+        if (node instanceof BlockStmt blockNode) {
+            // TODO 将来实现变量作用域时，在这里推入新环境，执行完毕后弹出
+            for (Stmt stmt : blockNode.getStmts()) {
+                interpret(stmt);
+            }
             return RuntimeValue.ofVoid();
         }
 
