@@ -4,6 +4,9 @@ import java.math.BigDecimal;
 
 public class RuntimeValue {
 
+    public static final RuntimeValue Null = new RuntimeValue(Type.Null, null);
+    public static final RuntimeValue Void = new RuntimeValue(Type.Void, null);
+
     private final Type type;
     private final Object value;
 
@@ -40,6 +43,10 @@ public class RuntimeValue {
         return type == Type.String;
     }
 
+    public boolean isVoid() {
+        return type == Type.Void;
+    }
+
     public boolean isNullType() {
         return type == Type.Null;
     }
@@ -60,13 +67,21 @@ public class RuntimeValue {
         return new RuntimeValue(Type.String, value);
     }
 
+    public static RuntimeValue ofNull() {
+        return Null;
+    }
+
+    public static RuntimeValue ofVoid() {
+        return Void;
+    }
+
     @Override
     public String toString() {
         return String.format("RuntimeValue(type: %s, value: %s)", type, value);
     }
 
     public enum Type {
-        Integer, Decimal, String, Boolean, Null;
+        Integer, Decimal, String, Boolean, Null, Void;
     }
 
 }
