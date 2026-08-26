@@ -3,7 +3,7 @@ package com.wonton;
 import com.wonton.lexical.Lexer;
 import com.wonton.lexical.Token;
 import com.wonton.syntax.Parser;
-import com.wonton.syntax.node.expression.Expr;
+import com.wonton.syntax.node.Node;
 import com.wonton.utils.FileUtils;
 import org.junit.jupiter.api.Test;
 
@@ -27,7 +27,7 @@ public class SyntaxTest {
         System.out.println("-----------------------------------------------------------------------");
 
         Parser parser = new Parser(tokens);
-        Expr ast = parser.parse();
+        Node ast = parser.parse();
         System.out.println("[ast] -----------------------------------------------------------------");
         System.out.println(ast.toPrettyString());
         System.out.println("-----------------------------------------------------------------------");
