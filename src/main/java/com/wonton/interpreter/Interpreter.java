@@ -3,6 +3,9 @@ package com.wonton.interpreter;
 import com.wonton.lexical.TokenType;
 import com.wonton.syntax.node.Node;
 import com.wonton.syntax.node.expression.*;
+import com.wonton.syntax.node.statement.PrintStmt;
+import com.wonton.syntax.node.statement.Stmt;
+import com.wonton.syntax.node.statement.Stmts;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -111,6 +114,21 @@ public class Interpreter {
             if (operator == TokenType.Or) {
                 return or(logicalNode.getLeft(), logicalNode.getRight());
             }
+        }
+
+        if (node instanceof Stmts stmtsNode) {
+            for (Stmt stmt : stmtsNode.getStmts()) {
+                // 语句不返回运算结果，只需要被执行
+                interpret(stmt);
+            }
+            return RuntimeValue.ofVoid();
+        }
+
+        if (node instanceof PrintStmt printNode) {
+            // print的值有可能是一个表达式，因此需要被解释成运行时值
+            RuntimeValue printRuntimeVal = interpret(printNode.getValue());
+            System.out.print(printRuntimeVal.getValue());
+            return RuntimeValue.ofVoid();
         }
 
         throw new RuntimeException("未知的语法树节点类型: " + node.getClass().getName());

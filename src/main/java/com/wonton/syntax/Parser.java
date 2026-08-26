@@ -3,10 +3,15 @@ package com.wonton.syntax;
 import com.wonton.lexical.Token;
 import com.wonton.lexical.TokenType;
 import com.wonton.logger.Logger;
+import com.wonton.syntax.node.Node;
 import com.wonton.syntax.node.expression.*;
+import com.wonton.syntax.node.statement.PrintStmt;
+import com.wonton.syntax.node.statement.Stmt;
+import com.wonton.syntax.node.statement.Stmts;
 
 import java.math.BigDecimal;
 import java.text.MessageFormat;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -29,9 +34,69 @@ public class Parser {
         this.current = 0;
     }
 
-    public Expr parse() {
-        Expr ast = expr();
+    public Node parse() {
+        Stmts ast = program();
         return ast;
+    }
+
+    private Stmts program() {
+        Stmts stmts = stmts();
+        return stmts;
+    }
+
+    private Stmts stmts() {
+        List<Stmt> stmtList = new ArrayList<>();
+        // TODO 目前的实现是把所有的token都消费作为一个句子了，事实上我们需要考虑多个句子的构成，例如句子的开始和结束
+        while (current < tokens.size()) {
+            Stmt stmt = stmt();
+            stmtList.add(stmt);
+        }
+        return new Stmts(stmtList);
+    }
+
+    private Stmt stmt() {
+        // TODO 解析 print语句、if语句、while语句、for语句、assignment语句、function call、etc
+        Token token = peek();
+        switch (token.getType()) {
+            case Print -> {
+                return printStmt();
+            }
+            case If -> {
+                return ifStmt();
+            }
+            case While -> {
+                return whileStmt();
+            }
+            case For -> {
+                return forStmt();
+            }
+            case Function -> {
+                return functionDeclaration();
+            }
+        }
+        return null;
+    }
+
+    private Stmt printStmt() {
+        consume(TokenType.Print);
+        Expr value = expr();
+        return new PrintStmt(value);
+    }
+
+    private Stmt ifStmt() {
+        return null;
+    }
+
+    private Stmt whileStmt() {
+        return null;
+    }
+
+    private Stmt forStmt() {
+        return null;
+    }
+
+    private Stmt functionDeclaration() {
+        return null;
     }
 
     private Expr expr() {
@@ -264,7 +329,17 @@ public class Parser {
     }
 
     /**
-     * 匹配 Token
+     * 仅消费Token，什么也不做
+     */
+    private void consume(TokenType type) {
+        if (match(type)) {
+            return;
+        }
+        parseError("Unexpected token", previous().getLine());
+    }
+
+    /**
+     * 匹配并消费 Token
      * @description 匹配当前 Token 是否为指定类型，如果是则消费之；否则不消费
      */
     private boolean match(TokenType type) {
