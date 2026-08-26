@@ -38,6 +38,8 @@ public enum TokenType {
     If,
     Else,
     While,
+    For,
+    Function,
     Return,
 
     Const,

@@ -13,6 +13,7 @@ public class Keywords {
         keywords.put("if", TokenType.If);
         keywords.put("else", TokenType.Else);
         keywords.put("while", TokenType.While);
+        keywords.put("for", TokenType.For);
         keywords.put("return", TokenType.Return);
         keywords.put("const", TokenType.Const);
         keywords.put("true", TokenType.Boolean);
