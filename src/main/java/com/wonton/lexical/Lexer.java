@@ -1,5 +1,7 @@
 package com.wonton.lexical;
 
+import com.wonton.logger.Logger;
+
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
@@ -62,12 +64,34 @@ public class Lexer {
             }
             // 字符串
             else if(ch == '"') {
-                while (peek() != '"') {
-                    advance();
+                StringBuilder builder = new StringBuilder();
+                while (true) {
+                    char c = peek();
+                    // 字符串结束标志
+                    if (c == '\0') {
+                        scanError("字符串未闭合，缺少结束的引号");
+                    }
+                    // 不允许直接写真实的换行符，应该用转义符来表示
+                    // 宿主语言为了表示换行，需要用转义符来表示
+                    if (c == '\n') {
+                        scanError("字符串不能包含真实的换行符");
+                    }
+                    if (c == '"') {
+                        break;
+                    }
+                    c = advance();
+                    // 宿主语言中，为了表示1个斜杠，需要用2个斜杠的写法来表示
+                    if (c == '\\') {
+                        // 反斜杠开启转义序列，翻译为真实字符后写入字面量
+                        builder.append(escape());
+                    } else {
+                        builder.append(c);
+                    }
                 }
                 // 消费剩下的那个引号
                 advance();
-                addToken(TokenType.String);
+                // 字面量是转义解析后的结果，已不等于源码原文，必须显式传入
+                addToken(TokenType.String, builder.toString());
             }
             // 标识符 和 所有关键字
             else if(isIdentifierStart(ch)) {
@@ -127,6 +151,11 @@ public class Lexer {
         tokens.add(token);
     }
 
+    private void addToken(TokenType type, Object literal) {
+        Token token = new Token(type, getLexeme(), literal, line);
+        tokens.add(token);
+    }
+
     // 获取当前词素
     private String getLexeme() {
         return source.substring(start, current);
@@ -134,9 +163,6 @@ public class Lexer {
 
     // 获取当前字面量
     private Object getLiteral(TokenType type) {
-        if (type == TokenType.String) {
-            return source.substring(start + 1, current - 1);
-        }
         if (type == TokenType.Integer) {
             return Long.parseLong(getLexeme());
         }
@@ -152,6 +178,56 @@ public class Lexer {
     // 判断字符是否是数字
     private boolean isDigit(char c) {
         return c >= '0' && c <= '9';
+    }
+
+    // 判断字符是否是十六进制数字（0-9、a-f、A-F）
+    private boolean isHexDigit(char c) {
+        return isDigit(c) || (c >= 'a' && c <= 'f') || (c >= 'A' && c <= 'F');
+    }
+
+    /**
+     * 解析反斜杠之后的转义序列，返回转义后的真实字符。
+     * 转义集对齐 C 系语言标准命名转义（不含已弃用的八进制转义）。
+     */
+    private char escape() {
+        if (isAtEnd()) {
+            // 在宿主语言里面 为了标识目标语言中的1个反斜杠，需要用2个反斜杠的写法来表示
+            scanError("字符串意外结束：'\\' 后面缺少转义字符");
+        }
+        char escaped = advance();
+        return switch (escaped) {
+            case 'n' -> '\n';   // 换行
+            case 't' -> '\t';   // 制表符
+            case 'r' -> '\r';   // 回车
+            case 'b' -> '\b';   // 退格
+            case 'f' -> '\f';   // 换页
+            case '0' -> '\0';   // 空字符
+            case '\\' -> '\\';   // 反斜杠本身
+            case '"' -> '"';    // 双引号本身
+            case 'u' -> unicodeEscape();
+            default -> {
+                scanError("不支持的转义字符：\\" + escaped);
+                yield '\0'; // 跳出switch表达式
+            }
+        };
+    }
+
+    /**
+     * 解析 \\u????：读取4位十六进制数字，转换为对应的Unicode字符
+     */
+    private char unicodeEscape() {
+        StringBuilder hex = new StringBuilder();
+        for (int i = 0; i < 4; i++) {
+            if (isAtEnd()) {
+                scanError("\\u 转义不完整：需要4位十六进制数字");
+            }
+            char c = advance();
+            if (!isHexDigit(c)) {
+                scanError("\\u 转义无效：'" + c + "' 不是十六进制数字");
+            }
+            hex.append(c);
+        }
+        return (char) Integer.parseInt(hex.toString(), 16);
     }
 
     // 标识符首字母规则
@@ -202,6 +278,11 @@ public class Lexer {
     // 是否已消费完所有字符
     private boolean isAtEnd() {
         return current >= source.length();
+    }
+
+    private void scanError(String message) {
+        Logger.error("[行 {0}] 词法错误：{1}", line, message);
+        System.exit(1);
     }
 
 }
