@@ -35,6 +35,10 @@ public class Interpreter {
             return RuntimeValue.of(boolNode.getValue());
         }
 
+        if (node instanceof NullExpr nullNode) {
+            return RuntimeValue.ofNull();
+        }
+
         if (node instanceof ParenExpr parenNode) {
             return interpret(parenNode.getExpression());
         }

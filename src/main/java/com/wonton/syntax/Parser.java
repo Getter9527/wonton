@@ -384,6 +384,9 @@ public class Parser {
             Boolean literal = (Boolean) previous().getLiteral();
             return new BooleanExpr(literal);
         }
+        if (match(TokenType.Null)) {
+            return new NullExpr();
+        }
         // 解析左括号
         if (match(TokenType.LeftParen)) {
             // 解析括号中的表达式

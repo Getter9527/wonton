@@ -1,0 +1,12 @@
+# null 字面量
+var a = null;
+print "a = " + a;
+print "\n";
+
+# 未初始化变量的默认值也是 null
+var b;
+print "b = " + b;
+print "\n";
+
+# null 直接作为表达式
+print null;
