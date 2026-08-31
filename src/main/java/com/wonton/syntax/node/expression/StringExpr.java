@@ -1,5 +1,7 @@
 package com.wonton.syntax.node.expression;
 
+import com.wonton.utils.StringUtils;
+
 public class StringExpr extends Expr {
 
     private final String value;
@@ -14,6 +16,6 @@ public class StringExpr extends Expr {
 
     @Override
     public String pretty(int depth) {
-        return indent(depth) + "StringExpr(" + getValue() + ")";
+        return indent(depth) + "StringExpr(" + StringUtils.unescape(getValue()) + ")";
     }
 }
