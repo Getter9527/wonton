@@ -1,0 +1,29 @@
+# 变量声明与字符串拼接
+var name = "wonton";
+var age = 3;
+print "语言名称是" + name + "，年龄是" + age;
+print "\n";
+
+# 未初始化的变量，默认是 null
+var x;
+print "未初始化的x是" + x;
+print "\n";
+
+# 变量参与表达式运算
+x = 10;
+var y = x * 2 + 5;
+print "y = " + y;
+print "\n";
+
+# 常量
+const pi = 3.14;
+print "pi = " + pi;
+print "\n";
+
+# 块级作用域：块内的同名变量遮蔽外层变量，出块后恢复
+if 1 == 1 {
+    var x = 999;
+    print "块内的x = " + x;
+    print "\n";
+}
+print "块外的x = " + x;
