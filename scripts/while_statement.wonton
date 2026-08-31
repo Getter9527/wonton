@@ -1,0 +1,22 @@
+# 简单我while遍历打印
+var a = 1;
+while (a <= 3) {
+    print "a的值是：" + a + "\n";
+    a = a + 1;
+}
+
+# 累加求和
+var sum = 0;
+var temp = 1;
+while (temp <= 10) {
+    sum = sum + temp;
+    temp = temp + 1;
+}
+print "求和: 1+2+...+10 = " + sum + "\n";
+
+
+# 测试 while语句块的内部作用域访问权限
+while (false) {
+    var innerText = "一段不会被执行的文本内容";
+}
+print "尝试访问 innerText变量:" + innerText; # 循环体内部的变量无法被外部访问，这行代码会报错！

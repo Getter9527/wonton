@@ -160,6 +160,22 @@ public class Interpreter {
             return RuntimeValue.ofVoid();
         }
 
+        if (node instanceof WhileStmt whileNode) {
+            while(true) {
+                RuntimeValue condition = interpret(whileNode.getCondition());
+                if (!condition.isBoolean()) {
+                    throw new RuntimeException("条件表达式必须是布尔值");
+                }
+                // 不满足条件则不循环
+                if (!(boolean) condition.getValue()) {
+                    break;
+                }
+                // 满足条件则循环语句块中的内容
+                interpret(whileNode.getWhileBlock());
+            }
+            return RuntimeValue.ofVoid();
+        }
+
         if (node instanceof BlockStmt blockNode) {
             // 暂存外部环境
             Environment outerTemp = env;

@@ -109,8 +109,18 @@ public class Parser {
         return new IfStmt(condition, ifBlock, elseBlock);
     }
 
+    /**
+     * while循环语句
+     * <while> ::= "while" <expr> <block>
+     */
     private Stmt whileStmt() {
-        return null;
+        advance();
+        Expr condition = expr();
+        if (condition == null) {
+            parseError("while 后面缺少条件表达式", previous().getLine());
+        }
+        BlockStmt whileBlock = blockStmt();
+        return new WhileStmt(condition, whileBlock);
     }
 
     private Stmt forStmt() {
