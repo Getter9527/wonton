@@ -72,20 +72,29 @@ public class Parser {
             case Function -> {
                 return functionDeclaration();
             }
+            case Variable -> {
+                return variableDeclaration();
+            }
+            case Const -> {
+                return constantDeclaration();
+            }
+            case Identifier -> {
+                return assignment();
+            }
         }
         parseError(MessageFormat.format("意外的符号，无法解析为语句：{0}", token.getLexeme()), token.getLine());
         return null;
     }
 
     private Stmt printStmt() {
-        consume(TokenType.Print);
+        advance();
         Expr value = expr();
         consume(TokenType.Semicolon);
         return new PrintStmt(value);
     }
 
     private Stmt ifStmt() {
-        consume(TokenType.If);
+        advance();
         Expr condition = expr();
         if (condition == null) {
             parseError("if 后面缺少条件表达式", previous().getLine());
@@ -110,6 +119,52 @@ public class Parser {
 
     private Stmt functionDeclaration() {
         return null;
+    }
+
+    /**
+     * 变量/常量声明语句
+     * <declaration> ::= "var" <identifier> ("=" <expr>)? ";"
+     */
+    private Stmt variableDeclaration() {
+        advance();
+        Token name = expect(TokenType.Identifier);
+        Expr initializer = null;
+        // 声明变量并赋值，例: var a = 1;
+        if (match(TokenType.Equal)) {
+            initializer = expr();
+        }
+        // 仅声明变量，例: var a;
+        consume(TokenType.Semicolon);
+        return new VariableDeclarationStmt(name, initializer);
+    }
+
+    /**
+     * 变量/常量声明语句
+     * <declaration> ::= "const" <identifier> ("=" <expr>)? ";"
+     */
+    private Stmt constantDeclaration() {
+        advance();
+        Token identifier = expect(TokenType.Identifier);
+        Expr initializer = null;
+        // 声明常量并赋值，例: var a = 1;
+        if (match(TokenType.Equal)) {
+            initializer = expr();
+        }
+        // 仅声明常量，例: var a;
+        consume(TokenType.Semicolon);
+        return new ConstantDeclarationStmt(identifier, initializer);
+    }
+
+    /**
+     * 赋值语句
+     * <assignment> ::= <identifier> "=" <expr> ";"
+     */
+    private Stmt assignment() {
+        Token identifier = advance();
+        expect(TokenType.Equal); // 标识符后面必须是赋值，否则语法错误
+        Expr value = expr();
+        consume(TokenType.Semicolon);
+        return new AssignmentStmt(identifier, value);
     }
 
     private BlockStmt blockStmt() {
@@ -303,9 +358,16 @@ public class Parser {
      * @return primary
      */
     private Expr primary() {
-        // <primary> ::= <integer> | <decimal> | <boolean> | <string> | <paren>
+        // <primary> ::= <identifier> | <integer> | <decimal> | <boolean> | <string> | <paren>
         // <boolean>::= "true" | "false"
         // <paren>  ::= "(" <expr> ")"
+
+        // 变量
+        if (match(TokenType.Identifier)) {
+            Token identifier = previous();
+            return new VariableExpr(identifier);
+        }
+        // 字面量
         if (match(TokenType.Integer)) {
             Long literal = (Long) previous().getLiteral();
             return new IntegerExpr(literal);
@@ -363,10 +425,9 @@ public class Parser {
      * 仅消费Token，什么也不做
      */
     private void consume(TokenType type) {
-        if (match(type)) {
-            return;
+        if (!match(type)) {
+            parseError("期望TokenType:" + type, previous().getLine());
         }
-        parseError("期望TokenType:" + type, previous().getLine());
     }
 
     /**

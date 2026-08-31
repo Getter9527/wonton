@@ -15,6 +15,9 @@ import java.util.stream.Stream;
  */
 public class Interpreter {
 
+    // 解释器当前进入并正在使用的环境
+    private Environment env = new Environment();
+
     public RuntimeValue interpret(Node node) {
         if(node instanceof IntegerExpr intNode) {
             return RuntimeValue.of(intNode.getValue());
@@ -114,6 +117,12 @@ public class Interpreter {
             }
         }
 
+        // 如果是变量表达式，则从环境中获取变量的值
+        if (node instanceof VariableExpr varNode) {
+            String name = varNode.getIdentifier().getLexeme();
+            return env.get(name);
+        }
+
         if (node instanceof Stmts stmtsNode) {
             for (Stmt stmt : stmtsNode.getStmts()) {
                 // 语句不返回运算结果，只需要被执行
@@ -148,10 +157,46 @@ public class Interpreter {
         }
 
         if (node instanceof BlockStmt blockNode) {
-            // TODO 将来实现变量作用域时，在这里推入新环境，执行完毕后弹出
+            // 暂存外部环境
+            Environment outerTemp = env;
+            // 创建一个嵌套的新环境，并立即使用它
+            env = new Environment(env);
             for (Stmt stmt : blockNode.getStmts()) {
                 interpret(stmt);
             }
+            // 内部嵌套代码执行完成后，退回到外部环境
+            env = outerTemp;
+            return RuntimeValue.ofVoid();
+        }
+
+        if (node instanceof VariableDeclarationStmt varDeclarationNode) {
+            Expr initializer = varDeclarationNode.getInitializer();
+            RuntimeValue runtimeVal = initializer == null
+                    ? RuntimeValue.ofNull()
+                    : interpret(initializer);
+            // 变量名称
+            String name = varDeclarationNode.getIdentifier().getLexeme();
+            // 定义变量，并存入环境
+            env.define(name, runtimeVal, false);
+            return RuntimeValue.ofVoid();
+        }
+
+        if (node instanceof ConstantDeclarationStmt constDeclarationNode) {
+            Expr initializer = constDeclarationNode.getInitializer();
+            RuntimeValue runtimeVal = (initializer == null)
+                    ? RuntimeValue.ofNull()
+                    : interpret(initializer);
+            // 变量名称
+            String name = constDeclarationNode.getIdentifier().getLexeme();
+            // 定义常量
+            env.define(name, runtimeVal, true);
+            return RuntimeValue.ofVoid();
+        }
+
+        if (node instanceof AssignmentStmt assignNode) {
+            RuntimeValue runtimeVal = interpret(assignNode.getValue());
+            String name = assignNode.getIdentifier().getLexeme();
+            env.assign(name, runtimeVal);
             return RuntimeValue.ofVoid();
         }
 
