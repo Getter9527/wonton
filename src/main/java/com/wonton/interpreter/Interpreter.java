@@ -15,10 +15,12 @@ import java.util.stream.Stream;
  */
 public class Interpreter {
 
-    // 解释器当前进入并正在使用的环境
-    private Environment env = new Environment();
-
     public RuntimeValue interpret(Node node) {
+        Environment env = new Environment();
+        return interpret(node, env);
+    }
+
+    public RuntimeValue interpret(Node node, Environment env) {
         if(node instanceof IntegerExpr intNode) {
             return RuntimeValue.of(intNode.getValue());
         }
@@ -35,17 +37,17 @@ public class Interpreter {
             return RuntimeValue.of(boolNode.getValue());
         }
 
-        if (node instanceof NullExpr nullNode) {
+        if (node instanceof NullExpr) {
             return RuntimeValue.ofNull();
         }
 
         if (node instanceof ParenExpr parenNode) {
-            return interpret(parenNode.getExpression());
+            return interpret(parenNode.getExpression(), env);
         }
 
         if (node instanceof UnaryExpr unaryNode) {
             TokenType operator = unaryNode.getOperator().getType();
-            RuntimeValue operand = interpret(unaryNode.getOperand());
+            RuntimeValue operand = interpret(unaryNode.getOperand(), env);
             if (operator == TokenType.Plus) {
                 return positive(operand);
             }
@@ -61,8 +63,8 @@ public class Interpreter {
         if (node instanceof BinaryExpr binNode) {
 
             TokenType operator = binNode.getOperator().getType();
-            RuntimeValue left = interpret(binNode.getLeft());
-            RuntimeValue right = interpret(binNode.getRight());
+            RuntimeValue left = interpret(binNode.getLeft(), env);
+            RuntimeValue right = interpret(binNode.getRight(), env);
 
             if (operator == TokenType.Star) {
                 return multiply(left, right);
@@ -112,12 +114,14 @@ public class Interpreter {
         if (node instanceof LogicalExpr logicalNode) {
 
             TokenType operator = logicalNode.getOperator().getType();
+            Expr left = logicalNode.getLeft();
+            Expr right = logicalNode.getRight();
 
             if (operator == TokenType.And) {
-                return and(logicalNode.getLeft(), logicalNode.getRight());
+                return and(left, right, env);
             }
             if (operator == TokenType.Or) {
-                return or(logicalNode.getLeft(), logicalNode.getRight());
+                return or(left, right, env);
             }
         }
 
@@ -130,31 +134,31 @@ public class Interpreter {
         if (node instanceof Stmts stmtsNode) {
             for (Stmt stmt : stmtsNode.getStmts()) {
                 // 语句不返回运算结果，只需要被执行
-                interpret(stmt);
+                interpret(stmt, env);
             }
             return RuntimeValue.ofVoid();
         }
 
         if (node instanceof PrintStmt printNode) {
             // print的值有可能是一个表达式，因此需要被解释成运行时值
-            RuntimeValue printRuntimeVal = interpret(printNode.getValue());
+            RuntimeValue printRuntimeVal = interpret(printNode.getValue(), env);
             System.out.print(printRuntimeVal.getValue());
             return RuntimeValue.ofVoid();
         }
 
         if (node instanceof IfStmt ifNode) {
-            RuntimeValue condition = interpret(ifNode.getCondition());
+            RuntimeValue condition = interpret(ifNode.getCondition(), env);
             if (!condition.isBoolean()) {
                 throw new RuntimeException("条件表达式必须返回布尔值");
             }
             boolean conditionValue = (boolean) condition.getValue();
             // if
             if (conditionValue) {
-                return interpret(ifNode.getIfBlock());
+                return interpret(ifNode.getIfBlock(), env);
             }
             // else
             if (ifNode.getElseBlock() != null) {
-                return interpret(ifNode.getElseBlock());
+                return interpret(ifNode.getElseBlock(), env);
             }
             // 如果没有走进if也没有走进else
             return RuntimeValue.ofVoid();
@@ -162,7 +166,7 @@ public class Interpreter {
 
         if (node instanceof WhileStmt whileNode) {
             while(true) {
-                RuntimeValue condition = interpret(whileNode.getCondition());
+                RuntimeValue condition = interpret(whileNode.getCondition(), env);
                 if (!condition.isBoolean()) {
                     throw new RuntimeException("条件表达式必须是布尔值");
                 }
@@ -171,21 +175,17 @@ public class Interpreter {
                     break;
                 }
                 // 满足条件则循环语句块中的内容
-                interpret(whileNode.getWhileBlock());
+                interpret(whileNode.getWhileBlock(), env);
             }
             return RuntimeValue.ofVoid();
         }
 
         if (node instanceof BlockStmt blockNode) {
-            // 暂存外部环境
-            Environment outerTemp = env;
             // 创建一个嵌套的新环境，并立即使用它
-            env = new Environment(env);
+            Environment subEnv = new Environment(env);
             for (Stmt stmt : blockNode.getStmts()) {
-                interpret(stmt);
+                interpret(stmt, subEnv);
             }
-            // 内部嵌套代码执行完成后，退回到外部环境
-            env = outerTemp;
             return RuntimeValue.ofVoid();
         }
 
@@ -193,7 +193,7 @@ public class Interpreter {
             Expr initializer = varDeclarationNode.getInitializer();
             RuntimeValue runtimeVal = initializer == null
                     ? RuntimeValue.ofNull()
-                    : interpret(initializer);
+                    : interpret(initializer, env);
             // 变量名称
             String name = varDeclarationNode.getIdentifier().getLexeme();
             // 定义变量，并存入环境
@@ -205,7 +205,7 @@ public class Interpreter {
             Expr initializer = constDeclarationNode.getInitializer();
             RuntimeValue runtimeVal = (initializer == null)
                     ? RuntimeValue.ofNull()
-                    : interpret(initializer);
+                    : interpret(initializer, env);
             // 变量名称
             String name = constDeclarationNode.getIdentifier().getLexeme();
             // 定义常量
@@ -214,7 +214,7 @@ public class Interpreter {
         }
 
         if (node instanceof AssignmentStmt assignNode) {
-            RuntimeValue runtimeVal = interpret(assignNode.getValue());
+            RuntimeValue runtimeVal = interpret(assignNode.getValue(), env);
             String name = assignNode.getIdentifier().getLexeme();
             env.assign(name, runtimeVal);
             return RuntimeValue.ofVoid();
@@ -223,8 +223,8 @@ public class Interpreter {
         throw new RuntimeException("未知的语法树节点类型: " + node.getClass().getName());
     }
 
-    private RuntimeValue or(Expr left, Expr right) {
-        RuntimeValue leftRuntimeVal = interpret(left);
+    private RuntimeValue or(Expr left, Expr right, Environment env) {
+        RuntimeValue leftRuntimeVal = interpret(left, env);
         // 我们要求左值必须是布尔类型
         if (leftRuntimeVal.isBoolean()) {
             Boolean leftValue = (Boolean) leftRuntimeVal.getValue();
@@ -233,22 +233,22 @@ public class Interpreter {
                 return leftRuntimeVal;
             }
             // 当左值为false，必须向后求右值
-            return interpret(right);
+            return interpret(right, env);
         }
         throw new UnsupportedOperationException(
                 String.format("不支持的数据类型。操作类型=or 左操作数=%s", leftRuntimeVal.getValue())
         );
     }
 
-    private RuntimeValue and(Expr left, Expr right) {
-        RuntimeValue leftRuntimeVal = interpret(left);
+    private RuntimeValue and(Expr left, Expr right, Environment env) {
+        RuntimeValue leftRuntimeVal = interpret(left, env);
         if (leftRuntimeVal.isBoolean()) {
             Boolean leftValue = (Boolean) leftRuntimeVal.getValue();
             // 前者不满足，后者也无需计算
             if (!leftValue) {
                 return leftRuntimeVal;
             }
-            return interpret(right);
+            return interpret(right, env);
         }
         throw new UnsupportedOperationException(
                 String.format("不支持的数据类型。操作类型=and 左操作数=%s", leftRuntimeVal.getValue())
