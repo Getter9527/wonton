@@ -51,6 +51,10 @@ public class RuntimeValue {
         return type == Type.Null;
     }
 
+    public boolean isFunction() {
+        return type == Type.Function;
+    }
+
     public static RuntimeValue of(Long value) {
         return new RuntimeValue(Type.Integer, value);
     }
@@ -67,6 +71,10 @@ public class RuntimeValue {
         return new RuntimeValue(Type.String, value);
     }
 
+    public static RuntimeValue of(FunctionValue value) {
+        return new RuntimeValue(Type.Function, value);
+    }
+
     public static RuntimeValue ofNull() {
         return Null;
     }
@@ -81,7 +89,7 @@ public class RuntimeValue {
     }
 
     public enum Type {
-        Integer, Decimal, String, Boolean, Null, Void;
+        Integer, Decimal, String, Boolean, Null, Void, Function;
     }
 
 }

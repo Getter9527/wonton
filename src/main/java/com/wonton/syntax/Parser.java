@@ -69,9 +69,6 @@ public class Parser {
             case For -> {
                 return forStmt();
             }
-            case Function -> {
-                return functionDeclaration();
-            }
             case Variable -> {
                 return variableDeclaration();
             }
@@ -79,7 +76,17 @@ public class Parser {
                 return constantDeclaration();
             }
             case Identifier -> {
+                // 前瞻，区分调用语句 foo(...); 与赋值语句 foo = ...;
+                if (checkNext(TokenType.LeftParen)) {
+                    return expressionStmt();
+                }
                 return assignment();
+            }
+            case Function -> {
+                return functionDeclaration();
+            }
+            case Return -> {
+                return returnStmt();
             }
         }
         parseError(MessageFormat.format("意外的符号，无法解析为语句：{0}", token.getLexeme()), token.getLine());
@@ -128,7 +135,45 @@ public class Parser {
     }
 
     private Stmt functionDeclaration() {
-        return null;
+        advance();
+        Token funcName = expect(TokenType.Identifier);
+        pass(TokenType.LeftParen);
+        List<Token> params = new ArrayList<>();
+        // 有参数
+        if (!check(TokenType.RightParen)) {
+            // 添加第1个参数
+            params.add(expect(TokenType.Identifier));
+            // 添加后续参数
+            while (match(TokenType.Comma)) {
+                params.add(expect(TokenType.Identifier));
+            }
+        }
+        pass(TokenType.RightParen);
+        BlockStmt funcBody = blockStmt();
+        return new FunctionDeclarationStmt(funcName, params, funcBody);
+    }
+
+    private Stmt returnStmt() {
+        Token keyword = advance(); // 拿到返回值关键字
+        Expr value = null;
+        // 设置返回值
+        if (!check(TokenType.Semicolon)) {
+            value = expr();
+        }
+        pass(TokenType.Semicolon);
+        return new ReturnStmt(keyword, value);
+    }
+
+    /**
+     * 表达式语句
+     * <exprStmt> ::= <expr> ";"
+     *
+     * @return 表达式语句节点
+     */
+    private Stmt expressionStmt() {
+        Expr expr = expr();
+        pass(TokenType.Semicolon);
+        return new ExpressionStmt(expr);
     }
 
     /**
@@ -351,11 +396,34 @@ public class Parser {
      */
     private Expr exponent() {
         // TODO 目前不支持 2 ^ -3 ^ 4，中间出现一元运算的这种情况
-        Expr expr = primary();
+        Expr expr = call();
         while (matchAny(TokenType.Caret)) {
             Token operator = previous();
             Expr right = exponent(); // 右结合
             expr = new BinaryExpr(operator, expr, right);
+        }
+        return expr;
+    }
+
+    /**
+     * 函数调用（后缀层，优先级最高的表达式层）
+     * <call> ::= <primary> ("(" (<expr> ("," <expr>)*)? ")")*
+     *
+     * @return 调用表达式；若无括号则原样返回 primary
+     */
+    private Expr call() {
+        Expr expr = primary();
+        // while 循环支持链式调用，例如 f(1)(2)
+        while (match(TokenType.LeftParen)) {
+            List<Expr> args = new ArrayList<>();
+            if (!check(TokenType.RightParen)) {
+                args.add(expr());
+                while (match(TokenType.Comma)) {
+                    args.add(expr());
+                }
+            }
+            pass(TokenType.RightParen);
+            expr = new FunctionCallExpr(expr, args);
         }
         return expr;
     }
@@ -418,6 +486,41 @@ public class Parser {
     }
 
     /**
+     * 获取下一个 Token
+     */
+    private Token peekNext() {
+        return tokens.get(current + 1);
+    }
+
+    /**
+     * 判断当前 Token 是否为指定类型，只检查不消费
+     *
+     * @param type 期望的 Token 类型
+     * @return 匹配返回 true；不匹配或 token 已耗尽返回 false
+     */
+    private boolean check(TokenType type) {
+        if (current >= tokens.size()) {
+            return false;
+        }
+        Token token = peek();
+        return token.getType() == type;
+    }
+
+    /**
+     * 判断下一个 Token 是否为指定类型，只检查不消费
+     *
+     * @param type 期望的 Token 类型
+     * @return 匹配返回 true；不匹配或越界返回 false
+     */
+    private boolean checkNext(TokenType type) {
+        if (current + 1 >= tokens.size()) {
+            return false;
+        }
+        Token token = peekNext();
+        return token.getType() == type;
+    }
+
+    /**
      * 获取上一个 Token信息
      */
     private Token previous() {
@@ -432,6 +535,15 @@ public class Parser {
         Token token = tokens.get(current);
         current++;
         return token;
+    }
+
+    /**
+     * 检查Token，如果符合类型，则通过
+     */
+    private void pass(TokenType type) {
+        if (check(type)) {
+            current++;
+        }
     }
 
     /**

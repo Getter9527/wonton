@@ -7,7 +7,9 @@ import com.wonton.syntax.node.statement.*;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.stream.Stream;
 
 /**
@@ -142,6 +144,9 @@ public class Interpreter {
         if (node instanceof PrintStmt printNode) {
             // print的值有可能是一个表达式，因此需要被解释成运行时值
             RuntimeValue printRuntimeVal = interpret(printNode.getValue(), env);
+            if (printRuntimeVal == RuntimeValue.ofVoid()) {
+                throw new UnsupportedOperationException("由于函数没有返回值，所以不可以打印它的调用结果!");
+            }
             System.out.print(printRuntimeVal.getValue());
             return RuntimeValue.ofVoid();
         }
@@ -220,7 +225,81 @@ public class Interpreter {
             return RuntimeValue.ofVoid();
         }
 
+        if (node instanceof FunctionDeclarationStmt funcDeclarationNode) {
+            String funcName = funcDeclarationNode.getName().getLexeme();
+            FunctionValue funcValue = new FunctionValue(
+                    funcName,
+                    funcDeclarationNode.getParams(),
+                    funcDeclarationNode.getBody(),
+                    env
+            );
+            env.define(funcName, RuntimeValue.of(funcValue), false);
+            return RuntimeValue.ofVoid();
+        }
+
+        if (node instanceof ReturnStmt returnNode) {
+            // 注意：这里表示没有返回值，用 Void表示，而不是返回值为Null
+            // 如果想表示返回值为Null，应该判断 RuntimeValue.Type == Null
+            RuntimeValue returnValue = returnNode.getValue() == null
+                    ? RuntimeValue.ofVoid()
+                    : interpret(returnNode.getValue(), env);
+            // 抛出信号，请求终止函数调用
+            throw new ReturnSignal(returnValue);
+        }
+
+        if (node instanceof FunctionCallExpr funcCallNode) {
+            RuntimeValue callee = interpret(funcCallNode.getCallee(), env);
+            if (!callee.isFunction()) {
+                throw new RuntimeException("不是函数，无法被调用：" + callee.getValue());
+            }
+            FunctionValue funcValue = (FunctionValue) callee.getValue();
+            // 先在调用者环境中求值所有实参
+            List<RuntimeValue> argValues = new ArrayList<>();
+            for (Expr arg : funcCallNode.getArgs()) {
+                argValues.add(interpret(arg, env));
+            }
+            return call(funcValue, argValues);
+        }
+
         throw new RuntimeException("未知的语法树节点类型: " + node.getClass().getName());
+    }
+
+    /**
+     * 执行函数调用
+     * <p>基于闭包环境创建函数局部环境，绑定形参后执行函数体，
+     * 捕获 ReturnSignal 得到返回值；无 return 语句时默认返回 null。</p>
+     *
+     * @param funcValue 函数值
+     * @param argValues     实参值列表
+     * @return 函数返回值
+     */
+    private RuntimeValue call(FunctionValue funcValue, List<RuntimeValue> argValues) {
+        // 检查定义的形参数量 和 调用者传递的实参数量 是否一致
+        if (funcValue.getParams().size() != argValues.size()) {
+            throw new RuntimeException(
+                String.format(
+                    "函数 %s 参数个数不匹配：期望 %d 个，实际 %d 个",
+                    funcValue.getName(), funcValue.getParams().size(), argValues.size()
+                )
+            );
+        }
+        // 为本次函数调用创建一个独立的环境
+        // 将函数定义时所处的环境作为新环境的“父级”。这就是闭包（Closure）的实现原理 —— 让函数内部能访问外部变量，但外部访问不到内部变量。
+        Environment funcEnv = new Environment(funcValue.getClosure());
+        for (int i = 0; i < argValues.size(); i++) {
+            String paramName = funcValue.getParams().get(i).getLexeme();
+            // 绑定参数：将函数的参数定义到当前函数作用域范围内
+            funcEnv.define(paramName, argValues.get(i), false);
+        }
+        try {
+            // 函数调用：本质就是执行函数代码块
+            interpret(funcValue.getBody(), funcEnv);
+        } catch (ReturnSignal signal) {
+            // 当捕捉到return信号时，则会跳转至函数调用的地方，并完成此次函数调用
+            return signal.getValue();
+        }
+        // 如果函数没有显示的return语句，那么则默认返回void
+        return RuntimeValue.ofVoid();
     }
 
     private RuntimeValue or(Expr left, Expr right, Environment env) {
