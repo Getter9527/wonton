@@ -1,0 +1,25 @@
+# 1.函数的基础用法
+function add(a, b) {
+    return a + b;
+}
+
+print "1+2的结果是：" + add(1, 2);
+print "\n";
+
+
+# 2.函数的递归用法
+function factorial(n) {
+    if n <= 1 {
+        return 1;
+    }
+    return n * factorial(n - 1);
+}
+
+print factorial(5);  # 阶乘：5 * 4 * 3 * 2 * 1
+print "\n";
+
+
+# 3.无返回值和空函数体的情况
+function testVoid() {}
+print testVoid();  # 如果函数没有返回值，我们打印它会发生什么？
+print "\n";
