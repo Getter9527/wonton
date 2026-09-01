@@ -1,4 +1,4 @@
-# 简单我while遍历打印
+# 简单的循环打印
 var a = 1;
 while (a <= 3) {
     print "a的值是：" + a + "\n";
