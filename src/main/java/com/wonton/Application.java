@@ -13,7 +13,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Scanner;
 
-public class Main {
+public class Application {
 
     private static final int EX_USAGE = 64; // 命令使用错误
     private static final int EX_DATA_ERR = 65; // 输入数据错误
