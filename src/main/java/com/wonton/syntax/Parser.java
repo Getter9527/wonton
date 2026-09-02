@@ -2,7 +2,6 @@ package com.wonton.syntax;
 
 import com.wonton.lexical.Token;
 import com.wonton.lexical.TokenType;
-import com.wonton.logger.Logger;
 import com.wonton.syntax.node.Node;
 import com.wonton.syntax.node.expression.*;
 import com.wonton.syntax.node.statement.*;
@@ -607,9 +606,7 @@ public class Parser {
     }
 
     private void parseError(String message, int line) {
-        Logger.error("[行 {1} 列 {2}] {0}", message, line, "3:10");
-        // 一般性错误导致的退出程序
-        System.exit(1);
+        throw new RuntimeException("[行 " + line + "] 语法错误：" + message);
     }
 
 }

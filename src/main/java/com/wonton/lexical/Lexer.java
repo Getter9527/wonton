@@ -1,7 +1,5 @@
 package com.wonton.lexical;
 
-import com.wonton.logger.Logger;
-
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
@@ -281,8 +279,7 @@ public class Lexer {
     }
 
     private void scanError(String message) {
-        Logger.error("[行 {0}] 词法错误：{1}", line, message);
-        System.exit(1);
+        throw new RuntimeException("[行 " + line + "] 词法错误：" + message);
     }
 
 }
