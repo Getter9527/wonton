@@ -75,8 +75,12 @@ public class Application {
      * </p>
      */
     private static void runPrompt() {
+
         Logger.primary("欢迎使用【Wonton】程序语言，这里是交互式命令行程序（REPL）");
-        Logger.primary("（输入 exit 可退出交互式命令工具）");
+        Logger.info("输入 exit 可退出交互式命令工具");
+        Logger.info("输入 example 可查看示例程序");
+        Logger.info("请输入代码，按 Enter键获取执行结果：");
+
         Environment globalEnv = new Environment();
         Scanner scanner = new Scanner(System.in);
         while (true) {
@@ -94,6 +98,22 @@ public class Application {
             // 退出交互式命令
             if (line.equals("exit")) {
                 break;
+            }
+            if (line.equals("example")) {
+                System.out.println(
+                        """
+                        ------------------------------------------
+                        【示例程序】
+                        ------------------------------------------
+                        function add(a, b) {
+                            return a + b;
+                        }
+                        print add(1, 2) + "\\n";
+                        ------------------------------------------
+                        
+                        """
+                );
+                continue;
             }
             // 处理跨行输入：大括号未配平时继续读取后续行
             String source = readCompleteInput(scanner, line);
@@ -115,7 +135,7 @@ public class Application {
     private static String readCompleteInput(Scanner scanner, String firstLine) {
         StringBuilder builder = new StringBuilder(firstLine);
         while (braceDepth(builder.toString()) > 0) {
-            System.out.print("......> ");
+            System.out.print(">> ");
             if (!scanner.hasNextLine()) {
                 break;
             }
