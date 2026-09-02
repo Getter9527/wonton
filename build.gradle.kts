@@ -33,7 +33,7 @@ tasks.jar {
     archiveFileName.set("wonton.jar")
 }
 
-val javaToolchains = the<org.gradle.jvm.toolchain.JavaToolchainService>()
+val javaToolchains = the<JavaToolchainService>()
 
 tasks.register<Exec>("jpackage") {
     group = "distribution"
