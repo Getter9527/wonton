@@ -55,7 +55,7 @@ public class MainCompiler {
         try {
             source = Files.readString(Path.of(filePath));
         } catch (IOException e) {
-            Logger.error("读取源文件时出错：" + e.getMessage());
+            System.err.println("读取源文件时出错：" + e.getMessage());
             System.exit(66);
         }
 
@@ -89,7 +89,7 @@ public class MainCompiler {
         try {
             Files.writeString(asmFile, assemblyCode);
         } catch (IOException e) {
-            Logger.error("写入汇编文件时出错：" + e.getMessage());
+            System.err.println("写入汇编文件时出错：" + e.getMessage());
             System.exit(66);
         }
 
@@ -99,7 +99,7 @@ public class MainCompiler {
         try {
             assembler.assemble(asmFile.toString(), objFile, "win64");
         } catch (AssemblerException e) {
-            Logger.error("汇编时出错：" + e.getMessage());
+            System.err.println("汇编时出错：" + e.getMessage());
             System.exit(66);
         }
 
@@ -108,7 +108,7 @@ public class MainCompiler {
         try {
             assembler.link(objFile, outPath);
         } catch (AssemblerException e) {
-            Logger.error(e.getMessage());
+            System.err.println(e.getMessage());
             System.exit(65);
         }
 
@@ -117,7 +117,7 @@ public class MainCompiler {
             Files.deleteIfExists(asmFile);
             Files.deleteIfExists(Path.of(objFile));
         } catch (IOException e) {
-            Logger.error("删除临时文件时出错：" + e.getMessage());
+            System.err.println("删除临时文件时出错：" + e.getMessage());
             System.exit(66);
         }
 
