@@ -44,21 +44,43 @@ tasks.register<Exec>("jpackage") {
         // 通过工具链定位构建所用 JDK，无需 jpackage 在 PATH 中
         // launcherFor 返回 Provider<JavaLauncher>，需 get() 解开后才能访问 metadata
         val launcher = javaToolchains.launcherFor(java.toolchain).get()
-        val jPackageExe = launcher.metadata.installationPath
-            .file("bin/jpackage.exe").asFile.absolutePath
+        val jPackageExe = launcher.metadata.installationPath.file("bin/jpackage.exe").asFile.absolutePath
         val exeDest = layout.buildDirectory.dir("exe").get().asFile
-        // jpackage 不会覆盖已有产物，先清理旧目录
+        val iconFile = rootProject.file("icons/logo.ico")  // 图标路径
+        // 先清理旧目录中的产物
         exeDest.deleteRecursively()
-        commandLine(
-            jPackageExe,
-            "--type", "app-image", // 只生成目录形式的可执行程序，不做安装器（安装器需要 WiX 工具）
-            "--name", "wonton",
-            "--input", tasks.jar.get().destinationDirectory.get().asFile.absolutePath,
-            "--main-jar", tasks.jar.get().archiveFileName.get(),
-            "--main-class", application.mainClass.get(),
-            "--dest", exeDest.absolutePath,
-            "--win-console" // 生成控制台子系统启动器，print 的输出才能在终端显示（不加会变成窗口子系统，看不到输出）
-        )
+        val commandArgs = buildList {
+            add(jPackageExe)
+            // 只生成目录形式的可执行程序，不做安装器（安装器需要 WiX 工具）
+            add("--type")
+            add("app-image")
+
+            add("--name")
+            add("wonton")
+
+            add("--input")
+            add(tasks.jar.get().destinationDirectory.get().asFile.absolutePath)
+
+            add("--main-jar")
+            add(tasks.jar.get().archiveFileName.get())
+
+            add("--main-class")
+            add(application.mainClass.get())
+
+            add("--dest")
+            add(exeDest.absolutePath)
+            // 生成控制台子系统启动器，print 的输出才能在终端显示（不加会变成窗口子系统，看不到输出）
+            add("--win-console")
+
+            // 如果图标文件存在，则添加图标参数
+            if (iconFile.exists()) {
+                add("--icon")
+                add(iconFile.absolutePath)
+            } else {
+                logger.warn("由于 LOGO 图标文件未找到：${iconFile.absolutePath}，将使用默认图标")
+            }
+        }
+        commandLine(commandArgs)
     }
 }
 
