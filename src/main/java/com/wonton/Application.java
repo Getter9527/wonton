@@ -119,6 +119,8 @@ public class Application {
             String source = readCompleteInput(scanner, line);
             try {
                 run(source, globalEnv);
+                // 用户通过REPL的方式打印信息时，如果不换行就会和换行提示重叠，所以每次执行程序都先换行，确保输出清晰
+                System.out.println();
             } catch (RuntimeException e) {
                 Logger.error(e.getMessage());
             }
