@@ -23,3 +23,22 @@ git -c http.proxy=http://127.0.0.1:1080 -c https.proxy=http://127.0.0.1:1080 pus
 # 使用 SOCKS5 代理
 git -c http.proxy="socks5://127.0.0.1:1080" -c https.proxy="socks5://127.0.0.1:1080" push
 ```
+
+通过 Gradle 的 Application Plugin 执行脚本
+```shell
+# 运行脚本文件
+.\gradlew run --args=".../filename.wonton"
+```
+
+```shell
+# 运行 REPL
+.\gradlew run
+```
+
+构建可执行程序
+
+```shell
+.\gradlew jpackage
+```
+
+产物在 build\exe\wonton\，里面是 wonton.exe + 内嵌运行时
