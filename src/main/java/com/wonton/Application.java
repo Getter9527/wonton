@@ -79,7 +79,7 @@ public class Application {
         Logger.primary("欢迎使用【Wonton】程序语言，这里是交互式命令行程序（REPL）");
         Logger.info("输入 exit 可退出交互式命令工具");
         Logger.info("输入 example 可查看示例程序");
-        Logger.info("请输入代码，按 Enter键获取执行结果：");
+        Logger.info("请输入代码，按 Enter 键获取执行结果：\n");
 
         Environment globalEnv = new Environment();
         Scanner scanner = new Scanner(System.in);
