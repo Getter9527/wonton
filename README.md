@@ -42,3 +42,40 @@ git -c http.proxy="socks5://127.0.0.1:1080" -c https.proxy="socks5://127.0.0.1:1
 ```
 
 产物在 build\exe\wonton\，里面是 wonton.exe + 内嵌运行时
+
+
+WSL 安装编译环境
+```shell
+# 连接至 WSL2
+wsl
+
+# 更新软件包列表
+sudo apt update
+
+# 安装 NASM（汇编器）
+sudo apt install -y nasm
+
+# 安装 Clang（链接器）
+sudo apt install -y clang
+
+# 安装 GCC（备用链接器）
+sudo apt install -y build-essential
+
+# 验证安装
+nasm --version
+clang --version
+gcc --version
+
+# 退出 WSL2
+exit
+```
+
+WSL 安装JDK
+```shell
+# 安装 OpenJDK 21（Ubuntu系统目前最高版本的JDK21）
+sudo apt install -y openjdk-21-jdk openjdk-21-jre
+
+# 验证
+java --version
+javac --version
+```
