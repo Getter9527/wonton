@@ -1,5 +1,6 @@
 package com.wonton;
 
+import com.wonton.compiler.Compiler;
 import com.wonton.compiler.frontend.lexical.Lexer;
 import com.wonton.compiler.frontend.lexical.Token;
 import com.wonton.compiler.frontend.syntax.Parser;
@@ -9,7 +10,7 @@ import com.wonton.interpreter.Interpreter;
 import com.wonton.logger.Logger;
 import com.wonton.utils.FileUtils;
 
-import java.util.Arrays;
+import java.io.IOException;
 import java.util.List;
 import java.util.Scanner;
 
@@ -20,18 +21,118 @@ public class Application {
     private static final int EX_NO_INPUT = 66; // 输入文件不存在 或 不可读取
 
     public static void main(String[] args) {
-        if (args.length > 1) {
-            // 超过1个参数，不符合标准
-            Logger.info("【用法】wonton <文件地址>");
-            Logger.info("【用户实际输入】" + String.join(" ", Arrays.toString(args)));
-            // 退出码64：命令使用错误，立即终止程序
-            System.exit(EX_USAGE);
-        } else if (args.length == 1) {
-            // 1个参数，运行文件
-            runFile(args[0]);
-        } else {
-            // 交互式模式
-            runPrompt();
+        // 带交互效果的：wonton.exe
+        if (args == null || args.length == 0) {
+            String selectedMode = getSelectedMode();
+            switch (selectedMode) {
+                case "compile" -> {
+                    try {
+                        Compiler.compile(getSourcePath(), getOutputPath());
+                        pause();
+                    } catch (Exception e) {
+                        System.err.println("编译失败：" + e.getMessage());
+                        System.exit(65);
+                    }
+                    return;
+                }
+                case "interpret" -> {
+                    runFile(getSourcePath());
+                    pause();
+                    return;
+                }
+                case "REPL" -> {
+                    runPrompt();
+                    return;
+                }
+            }
+            return;
+        }
+        // 当参数数量不对时，给予用法提示
+        if (args.length == 1) {
+            System.err.println(
+                """
+                【用法】wonton <运行模式> <源码路径> [生成路径]
+                【示例】wonton interpreter ./hello.wonton ./out/hello.exe
+                【说明】
+                    - 运行模式（必填）: 支持2种模式，编译模式（compile） 和 解释器模式（interpret）
+                    - 源码路径（必填）: 源代码文件的完整路径
+                    - 生成路径（可选）: 生成的目标代码位置
+                """
+            );
+            System.exit(EX_USAGE); // 退出码64：命令使用错误，立即终止程序
+        }
+
+        // 命令行传参的使用方式
+        String mode = args[0];
+        String sourcePath = args[1];
+
+        if (mode.equals("compile")) {
+            try {
+                String outPath = args[2];
+                Compiler.compile(sourcePath, outPath);
+            } catch (Exception e) {
+                System.err.println("编译失败：" + e.getMessage());
+                System.exit(65);
+            }
+            return;
+        }
+        if (mode.equals("interpret")) {
+            runFile(sourcePath);
+            return;
+        }
+    }
+
+    private static String getSelectedMode() {
+        while (true) {
+            System.out.println(
+                    """
+                    请输入序号，选择对应的运行模式:
+                    
+                    1 编译器模式
+                    2 解释器模式
+                    3 交互模式（REPL）
+                    """
+            );
+            Scanner scanner = new Scanner(System.in);
+            String selected = scanner.nextLine();
+            System.out.println();
+            switch (selected) {
+                case "1" -> {
+                    return "compile";
+                }
+                case "2" -> {
+                    return "interpret";
+                }
+                case "3" -> {
+                    return "REPL";
+                }
+                default -> System.err.println("输入的序号错误！");
+            }
+        }
+    }
+
+    private static String getSourcePath() {
+        System.out.println("请输入源文件的相对路径或完整路径:");
+        Scanner scanner = new Scanner(System.in);
+        String sourcePath = scanner.nextLine();
+        System.out.println();
+        return sourcePath;
+    }
+
+    private static String getOutputPath() {
+        System.out.println("请输入生成的目标文件的相对路径或完整路径:");
+        Scanner scanner = new Scanner(System.in);
+        String outputPath = scanner.nextLine();
+        System.out.println();
+        return outputPath;
+    }
+
+    private static void pause() {
+        System.out.println("按回车键退出...");
+        try {
+            int key = System.in.read();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
         }
     }
 
