@@ -17,11 +17,6 @@ import java.util.stream.Stream;
  */
 public class Interpreter {
 
-    public RuntimeValue interpret(Node node) {
-        Environment env = new Environment();
-        return interpret(node, env);
-    }
-
     public RuntimeValue interpret(Node node, Environment env) {
         if(node instanceof IntegerExpr intNode) {
             return RuntimeValue.of(intNode.getValue());

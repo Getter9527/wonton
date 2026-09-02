@@ -1,5 +1,6 @@
 package com.wonton;
 
+import com.wonton.interpreter.Environment;
 import com.wonton.interpreter.Interpreter;
 import com.wonton.interpreter.RuntimeValue;
 import com.wonton.lexical.Lexer;
@@ -29,7 +30,7 @@ public class InterpreterTest {
 
         // 解释执行
         Interpreter interpreter = new Interpreter();
-        RuntimeValue result = interpreter.interpret(ast);
+        RuntimeValue result = interpreter.interpret(ast, new Environment());
         Logger.success("结果: {0}", result);
     }
 
@@ -53,7 +54,7 @@ public class InterpreterTest {
 
         // 解释执行
         Interpreter interpreter = new Interpreter();
-        RuntimeValue result = interpreter.interpret(ast);
+        RuntimeValue result = interpreter.interpret(ast, new Environment());
         Logger.success("结果: {0}", result);
     }
 
@@ -77,7 +78,7 @@ public class InterpreterTest {
 
         // 解释执行
         Interpreter interpreter = new Interpreter();
-        RuntimeValue result = interpreter.interpret(ast);
+        RuntimeValue result = interpreter.interpret(ast, new Environment());
         Logger.success("结果: {0}", result);
     }
 
@@ -101,7 +102,7 @@ public class InterpreterTest {
 
         // 解释执行
         Interpreter interpreter = new Interpreter();
-        RuntimeValue result = interpreter.interpret(ast);
+        RuntimeValue result = interpreter.interpret(ast, new Environment());
         Logger.success("结果: {0}", result);
     }
 
@@ -125,7 +126,7 @@ public class InterpreterTest {
 
         // 解释执行
         Interpreter interpreter = new Interpreter();
-        RuntimeValue result = interpreter.interpret(ast);
+        RuntimeValue result = interpreter.interpret(ast, new Environment());
         Logger.success("结果: {0}", result);
     }
 
@@ -149,7 +150,7 @@ public class InterpreterTest {
 
         // 解释执行
         Interpreter interpreter = new Interpreter();
-        RuntimeValue result = interpreter.interpret(ast);
+        RuntimeValue result = interpreter.interpret(ast, new Environment());
         Logger.success("结果: {0}", result);
     }
 
@@ -173,7 +174,7 @@ public class InterpreterTest {
 
         // 解释执行
         Interpreter interpreter = new Interpreter();
-        RuntimeValue result = interpreter.interpret(ast);
+        RuntimeValue result = interpreter.interpret(ast, new Environment());
         Logger.success("结果: {0}", result);
     }
 
@@ -197,7 +198,7 @@ public class InterpreterTest {
 
         // 解释执行
         Interpreter interpreter = new Interpreter();
-        interpreter.interpret(ast);
+        interpreter.interpret(ast, new Environment());
     }
 
     @Test
@@ -220,7 +221,7 @@ public class InterpreterTest {
 
         // 解释执行
         Interpreter interpreter = new Interpreter();
-        interpreter.interpret(ast);
+        interpreter.interpret(ast, new Environment());
     }
 
     @Test
@@ -243,7 +244,7 @@ public class InterpreterTest {
 
         // 解释执行
         Interpreter interpreter = new Interpreter();
-        interpreter.interpret(ast);
+        interpreter.interpret(ast, new Environment());
     }
 
     @Test
@@ -266,7 +267,7 @@ public class InterpreterTest {
 
         // 解释执行
         Interpreter interpreter = new Interpreter();
-        interpreter.interpret(ast);
+        interpreter.interpret(ast, new Environment());
     }
 
     @Test
@@ -289,7 +290,7 @@ public class InterpreterTest {
 
         // 解释执行
         Interpreter interpreter = new Interpreter();
-        interpreter.interpret(ast);
+        interpreter.interpret(ast, new Environment());
     }
 
     @Test
@@ -312,7 +313,7 @@ public class InterpreterTest {
 
         // 解释执行
         Interpreter interpreter = new Interpreter();
-        interpreter.interpret(ast);
+        interpreter.interpret(ast, new Environment());
     }
 
 }
