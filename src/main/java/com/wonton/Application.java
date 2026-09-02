@@ -75,11 +75,7 @@ public class Application {
      * </p>
      */
     private static void runPrompt() {
-
-        Logger.primary("欢迎使用【Wonton】程序语言，这里是交互式命令行程序（REPL）");
-        Logger.info("输入 exit 可退出交互式命令工具");
-        Logger.info("输入 example 可查看示例程序");
-        Logger.info("请输入代码，按 Enter 键获取执行结果：\n");
+        welcome(); // 欢迎提示词
 
         Environment globalEnv = new Environment();
         Scanner scanner = new Scanner(System.in);
@@ -98,6 +94,10 @@ public class Application {
             // 退出交互式命令
             if (line.equals("exit")) {
                 break;
+            }
+            if (line.equals("clear")) {
+                welcome();
+                continue;
             }
             if (line.equals("example")) {
                 System.out.println(
@@ -162,6 +162,31 @@ public class Application {
             }
         }
         return depth;
+    }
+
+    /**
+     * 欢迎提示信息
+     */
+    private static void welcome() {
+        clearScreen();
+        Logger.primary("欢迎使用【Wonton】程序语言，这里是交互式命令行程序（REPL）");
+        Logger.info("输入 exit 可退出交互式命令工具");
+        Logger.info("输入 clear 可清理终端屏幕");
+        Logger.info("输入 example 可查看示例程序");
+        Logger.info("请输入代码，按 Enter 键获取执行结果：\n");
+    }
+
+    /**
+     * 清屏函数：使用 ANSI 转义序列清空控制台
+     * <p>
+     *  发送 \033[2J（清屏）和 \033[H（光标复位）命令，
+     *  保持缓冲区干净，提升 REPL 交互体验。
+     * </p>
+     */
+    private static void clearScreen() {
+        // ANSI 转义序列：清屏 + 光标归位
+        System.out.print("\033[2J\033[H");
+        System.out.flush();
     }
 
 }
