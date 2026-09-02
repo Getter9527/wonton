@@ -1,7 +1,7 @@
 package com.wonton.interpreter;
 
-import com.wonton.lexical.Token;
-import com.wonton.syntax.node.statement.BlockStmt;
+import com.wonton.compiler.frontend.lexical.Token;
+import com.wonton.compiler.frontend.syntax.node.statement.BlockStmt;
 
 import java.util.List;
 

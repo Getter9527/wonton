@@ -1,12 +1,12 @@
 package com.wonton;
 
+import com.wonton.compiler.frontend.lexical.Lexer;
+import com.wonton.compiler.frontend.lexical.Token;
+import com.wonton.compiler.frontend.syntax.Parser;
+import com.wonton.compiler.frontend.syntax.node.Node;
 import com.wonton.interpreter.Environment;
 import com.wonton.interpreter.Interpreter;
-import com.wonton.lexical.Lexer;
-import com.wonton.lexical.Token;
 import com.wonton.logger.Logger;
-import com.wonton.syntax.Parser;
-import com.wonton.syntax.node.Node;
 import com.wonton.utils.FileUtils;
 
 import java.util.Arrays;

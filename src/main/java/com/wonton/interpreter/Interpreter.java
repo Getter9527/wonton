@@ -1,9 +1,9 @@
 package com.wonton.interpreter;
 
-import com.wonton.lexical.TokenType;
-import com.wonton.syntax.node.Node;
-import com.wonton.syntax.node.expression.*;
-import com.wonton.syntax.node.statement.*;
+import com.wonton.compiler.frontend.lexical.TokenType;
+import com.wonton.compiler.frontend.syntax.node.Node;
+import com.wonton.compiler.frontend.syntax.node.expression.*;
+import com.wonton.compiler.frontend.syntax.node.statement.*;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
