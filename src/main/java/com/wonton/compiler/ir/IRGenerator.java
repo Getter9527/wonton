@@ -24,6 +24,7 @@ public class IRGenerator {
      * @return 三元式列表
      */
     public List<Triplet> generate(Node node) {
+        System.out.println("IR 入口节点类型: " + node.getClass().getSimpleName());
         visit(node);
         return ir;
     }
@@ -33,15 +34,19 @@ public class IRGenerator {
      *
      * @param node 节点
      */
-    private void visit(com.wonton.compiler.frontend.syntax.node.Node node) {
-        if (node instanceof FunctionDeclarationStmt) {
-            generateFunction((FunctionDeclarationStmt) node);
-        } else if (node instanceof VariableDeclarationStmt) {
-            generateVariable((VariableDeclarationStmt) node);
-        } else if (node instanceof AssignmentStmt) {
-            generateAssignment((AssignmentStmt) node);
-        } else if (node instanceof BlockStmt) {
-            generateBlock((BlockStmt) node);
+    private void visit(Node node) {
+        switch (node) {
+            case Stmts stmts -> {
+                for (Node child : stmts.getStmts()) {
+                    visit(child);
+                }
+            }
+            case FunctionDeclarationStmt funcDeclarationStmt -> generateFunction(funcDeclarationStmt);
+            case VariableDeclarationStmt varDeclarationStmt -> generateVariable(varDeclarationStmt);
+            case AssignmentStmt assignStmt -> generateAssignment(assignStmt);
+            case BlockStmt blockStmt -> generateBlock(blockStmt);
+            case PrintStmt printStmt -> generatePrint(printStmt);
+            case null, default -> System.err.println("⚠️ IRGenerator: 未处理的节点类型: " + node.getClass().getSimpleName());
         }
     }
 
@@ -57,6 +62,27 @@ public class IRGenerator {
             generateVariable((VariableDeclarationStmt) stmt);
         } else if (stmt instanceof AssignmentStmt) {
             generateAssignment((AssignmentStmt) stmt);
+        } else if (stmt instanceof PrintStmt) {
+            generatePrint((PrintStmt) stmt);
+        }
+    }
+
+    // 新增方法
+    /**
+     * 生成 print 语句的 IR
+     */
+    private void generatePrint(PrintStmt print) {
+        Expr expr = print.getValue();
+        if (expr == null) return;
+
+        if (expr instanceof StringExpr) {
+            // 字符串直接输出
+            String value = ((StringExpr) expr).getValue();
+            ir.add(new Triplet("PRINT_STR", value, null, null));
+        } else {
+            // 非字符串表达式：先求值，再输出结果
+            String result = generateExpr(expr);
+            ir.add(new Triplet("PRINT_VAL", result, null, null));
         }
     }
 
