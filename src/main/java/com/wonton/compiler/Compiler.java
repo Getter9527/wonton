@@ -13,6 +13,7 @@ import com.wonton.compiler.ir.Triplet;
 import com.wonton.logger.Logger;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
@@ -27,22 +28,7 @@ import java.util.List;
  * 5. 代码生成 → x86_64 汇编
  * 6. 汇编/链接 → 原生 exe
  */
-public class MainCompiler {
-
-    public static void main(String[] args) {
-        // wonton <源码路径> <输出路径>
-        if (args.length == 2) {
-            try {
-                compile(args[0], args[1]);
-            } catch (Exception e) {
-                System.err.println("编译失败：" + e.getMessage());
-                System.exit(65);
-            }
-        } else {
-            System.out.println("用法: wonton <文件> [输出 exe]");
-            System.exit(64);
-        }
-    }
+public class Compiler {
 
     /**
      * 将源文件编译为可执行文件
@@ -79,15 +65,20 @@ public class MainCompiler {
         // 5. IR 生成 → 三元式/四元式
         IRGenerator irGenerator = new IRGenerator();
         List<Triplet> ir = irGenerator.generate(ast);
+        for (Triplet t : ir) {
+            System.out.println(t);
+        }
 
         // 6. 代码生成 → x86_64 汇编
         AsmCodeGenerator asmGenerator = new AsmCodeGenerator();
         String assemblyCode = asmGenerator.generate(ir);
+        System.out.println(assemblyCode);
 
         // 7. 保存汇编文件（临时文件）
         Path asmFile = Path.of("build/temp_" + System.currentTimeMillis() + ".asm");
         try {
-            Files.writeString(asmFile, assemblyCode);
+            // 显式使用 StandardCharsets.UTF_8，确保无 BOM
+            Files.writeString(asmFile, assemblyCode, StandardCharsets.UTF_8);
         } catch (IOException e) {
             System.err.println("写入汇编文件时出错：" + e.getMessage());
             System.exit(66);
@@ -121,6 +112,6 @@ public class MainCompiler {
             System.exit(66);
         }
 
-        Logger.success("编译成功！输出文件: {0}" + outPath);
+        System.out.println("编译成功！输出文件:" + outPath);
     }
 }
