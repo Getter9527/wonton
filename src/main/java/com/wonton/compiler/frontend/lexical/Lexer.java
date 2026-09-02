@@ -1,5 +1,7 @@
 package com.wonton.compiler.frontend.lexical;
 
+import com.wonton.utils.StringUtils;
+
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
@@ -58,8 +60,8 @@ public class Lexer {
             else if(Character.isWhitespace(ch)) {
                 if(ch == ' ') continue; // 忽略空格
                 else if (ch == '\t') continue; // 忽略制表符
-                else if(ch == '\n') line++; // 记录行号
-                else throw new RuntimeException("代码中存在不支持的空白字符");
+                else if(ch == '\n' || ch == '\r') line++; // 记录行号
+                else throw new RuntimeException("代码中存在不支持的空白字符:" + StringUtils.unescape(String.valueOf(ch)));
             }
             // 字符串
             else if(ch == '"') {
