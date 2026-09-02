@@ -57,6 +57,7 @@ public class Lexer {
             // 空白符
             else if(Character.isWhitespace(ch)) {
                 if(ch == ' ') continue; // 忽略空格
+                else if (ch == '\t') continue; // 忽略制表符
                 else if(ch == '\n') line++; // 记录行号
                 else throw new RuntimeException("代码中存在不支持的空白字符");
             }
