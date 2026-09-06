@@ -2,6 +2,7 @@ package com.wonton.compiler.ir;
 
 import com.wonton.compiler.frontend.lexical.TokenType;
 import com.wonton.compiler.frontend.syntax.node.Node;
+import com.wonton.compiler.frontend.syntax.node.Program;
 import com.wonton.compiler.frontend.syntax.node.expression.*;
 import com.wonton.compiler.frontend.syntax.node.statement.*;
 
@@ -36,8 +37,8 @@ public class IRGenerator {
      */
     private void visit(Node node) {
         switch (node) {
-            case Stmts stmts -> {
-                for (Node child : stmts.getStmts()) {
+            case Program program -> {
+                for (Node child : program.getStmts()) {
                     visit(child);
                 }
             }
@@ -46,7 +47,7 @@ public class IRGenerator {
             case AssignmentStmt assignStmt -> generateAssignment(assignStmt);
             case BlockStmt blockStmt -> generateBlock(blockStmt);
             case PrintStmt printStmt -> generatePrint(printStmt);
-            case null, default -> System.err.println("⚠️ IRGenerator: 未处理的节点类型: " + node.getClass().getSimpleName());
+            case null, default -> System.err.println("IRGenerator: 未处理的节点类型: " + node.getClass().getSimpleName());
         }
     }
 

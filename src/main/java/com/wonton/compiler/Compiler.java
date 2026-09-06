@@ -3,6 +3,7 @@ package com.wonton.compiler;
 import com.wonton.compiler.backend.AsmCodeGenerator;
 import com.wonton.compiler.backend.Assembler;
 import com.wonton.compiler.backend.AssemblerException;
+import com.wonton.compiler.frontend.analyzer.ProgramScope;
 import com.wonton.compiler.frontend.analyzer.SemanticAnalyzer;
 import com.wonton.compiler.frontend.lexical.Lexer;
 import com.wonton.compiler.frontend.lexical.Token;
@@ -60,7 +61,7 @@ public class Compiler {
 
         // 4. 语义分析 → 类型检查
         SemanticAnalyzer semanticAnalyzer = new SemanticAnalyzer();
-        semanticAnalyzer.analyze(ast);
+        semanticAnalyzer.analyze(ast, new ProgramScope());
 
         // 5. IR 生成 → 三元式/四元式
         IRGenerator irGenerator = new IRGenerator();
