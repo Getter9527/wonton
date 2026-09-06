@@ -2,6 +2,7 @@ package com.wonton.interpreter;
 
 import com.wonton.compiler.frontend.lexical.TokenType;
 import com.wonton.compiler.frontend.syntax.node.Node;
+import com.wonton.compiler.frontend.syntax.node.Program;
 import com.wonton.compiler.frontend.syntax.node.expression.*;
 import com.wonton.compiler.frontend.syntax.node.statement.*;
 
@@ -70,12 +71,19 @@ public class Interpreter {
                 // TODO 关于小数位除不尽和取舍的数学问题探讨和解决方案设计
                 return divide(left, right);
             }
-
             if (operator == TokenType.Plus) {
                 return add(left, right);
             }
             if (operator == TokenType.Minus) {
                 return subtract(left, right);
+            }
+
+            if (operator == TokenType.Modulo) {
+                return modulo(left, right);
+            }
+
+            if (operator == TokenType.Caret) {
+                return exponent(left, right);
             }
 
 
@@ -97,14 +105,6 @@ public class Interpreter {
             }
             if (operator == TokenType.NotEqual) {
                 return notEquality(left, right);
-            }
-
-            if (operator == TokenType.Modulo) {
-                return modulo(left, right);
-            }
-
-            if (operator == TokenType.Caret) {
-                return exponent(left, right);
             }
         }
 
@@ -128,8 +128,8 @@ public class Interpreter {
             return env.get(name);
         }
 
-        if (node instanceof Stmts stmtsNode) {
-            for (Stmt stmt : stmtsNode.getStmts()) {
+        if (node instanceof Program programNode) {
+            for (Stmt stmt : programNode.getStmts()) {
                 // 语句不返回运算结果，只需要被执行
                 interpret(stmt, env);
             }
@@ -326,29 +326,6 @@ public class Interpreter {
         }
         throw new UnsupportedOperationException(
                 String.format("不支持的数据类型。操作类型=and 左操作数=%s", leftRuntimeVal.getValue())
-        );
-    }
-
-    private RuntimeValue modulo(RuntimeValue left, RuntimeValue right) {
-        if (allNumbers(left, right)) {
-            BigDecimal leftValue = anyToDecimal(left);
-            BigDecimal rightValue = anyToDecimal(right);
-            return RuntimeValue.of(leftValue.remainder(rightValue));
-        }
-        throw new UnsupportedOperationException(
-                String.format("不支持的数据类型。操作类型=modulo 左操作数=%s 右操作数=%s", left.getValue(), right.getValue())
-        );
-    }
-
-    private RuntimeValue exponent(RuntimeValue left, RuntimeValue right) {
-        if (allNumbers(left, right)) {
-            double leftValue = anyToDecimal(left).doubleValue();
-            double rightValue = anyToDecimal(right).doubleValue();
-            double result = Math.pow(leftValue, rightValue);
-            return RuntimeValue.of(BigDecimal.valueOf(result));
-        }
-        throw new UnsupportedOperationException(
-                String.format("不支持的数据类型。操作类型=exponent 左操作数=%s 右操作数=%s", left.getValue(), right.getValue())
         );
     }
 
@@ -565,6 +542,35 @@ public class Interpreter {
         throw new RuntimeException("未知的运算类型: " + left.getType() + " " + right.getType());
     }
 
+    private RuntimeValue modulo(RuntimeValue left, RuntimeValue right) {
+        if (allIntegers(left, right)) {
+            Long leftValue = (Long) left.getValue();
+            Long rightValue = (Long) right.getValue();
+            return RuntimeValue.of(leftValue % rightValue);
+        }
+        if (allNumbers(left, right)) {
+            BigDecimal leftValue = anyToDecimal(left);
+            BigDecimal rightValue = anyToDecimal(right);
+            return RuntimeValue.of(leftValue.remainder(rightValue));
+        }
+        throw new UnsupportedOperationException(
+                String.format("不支持的数据类型。操作类型=modulo 左操作数=%s 右操作数=%s", left.getValue(), right.getValue())
+        );
+    }
+
+    private RuntimeValue exponent(RuntimeValue left, RuntimeValue right) {
+        // TODO 这里考虑采用BigInteger场景，而非传统的Long
+        if (allNumbers(left, right)) {
+            double leftValue = anyToDecimal(left).doubleValue();
+            double rightValue = anyToDecimal(right).doubleValue();
+            double result = Math.pow(leftValue, rightValue);
+            return RuntimeValue.of(BigDecimal.valueOf(result));
+        }
+        throw new UnsupportedOperationException(
+                String.format("不支持的数据类型。操作类型=exponent 左操作数=%s 右操作数=%s", left.getValue(), right.getValue())
+        );
+    }
+
     /**
      * 转换为字符串类型
      * <p>在非确定性转换时的场景下使用<p/>
@@ -614,7 +620,7 @@ public class Interpreter {
         throw new RuntimeException("不是数值类型: " + value.getClass().getName());
     }
 
-    public <T> Stream<T> toSafeStream(T[] array) {
+    private  <T> Stream<T> toSafeStream(T[] array) {
         if (array == null) {
             return Stream.empty();
         }
@@ -674,7 +680,7 @@ public class Interpreter {
      * 都是数值类型
      */
     private boolean allNumbers(RuntimeValue... values) {
-        return toSafeStream(values).allMatch(RuntimeValue::isNumbers);
+        return toSafeStream(values).allMatch(RuntimeValue::isNumber);
     }
 
 }

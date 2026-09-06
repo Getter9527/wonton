@@ -3,6 +3,7 @@ package com.wonton.compiler.frontend.syntax;
 import com.wonton.compiler.frontend.lexical.Token;
 import com.wonton.compiler.frontend.lexical.TokenType;
 import com.wonton.compiler.frontend.syntax.node.Node;
+import com.wonton.compiler.frontend.syntax.node.Program;
 import com.wonton.compiler.frontend.syntax.node.expression.*;
 import com.wonton.compiler.frontend.syntax.node.statement.*;
 
@@ -32,24 +33,18 @@ public class Parser {
     }
 
     public Node parse() {
-        Stmts ast = program();
+        Program ast = program();
         return ast;
     }
 
-    private Stmts program() {
-        Stmts stmts = stmts();
-        return stmts;
-    }
-
-    private Stmts stmts() {
-        List<Stmt> stmtList = new ArrayList<>();
-        // 只要有未消费的tokens，那么就继续消费
+    // 构建程序
+    private Program program() {
+        List<Stmt> stmts = new ArrayList<>();
         while (current < tokens.size()) {
-            // 按照句子去消费 tokens
-            Stmt stmt = stmt();
-            stmtList.add(stmt);
+            Stmt stmt = stmt(); // 解析句子
+            stmts.add(stmt);
         }
-        return new Stmts(stmtList);
+        return new Program(stmts);
     }
 
     private Stmt stmt() {
@@ -416,7 +411,9 @@ public class Parser {
         while (match(TokenType.LeftParen)) {
             List<Expr> args = new ArrayList<>();
             if (!check(TokenType.RightParen)) {
+                // 解析第1个参数
                 args.add(expr());
+                // 如果有后续参数，则继续解析
                 while (match(TokenType.Comma)) {
                     args.add(expr());
                 }
