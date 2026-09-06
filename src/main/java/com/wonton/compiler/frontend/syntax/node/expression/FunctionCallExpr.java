@@ -1,6 +1,4 @@
-package com.wonton.compiler.frontend.syntax.node.statement;
-
-import com.wonton.compiler.frontend.syntax.node.expression.Expr;
+package com.wonton.compiler.frontend.syntax.node.expression;
 
 import java.util.List;
 
