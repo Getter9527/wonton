@@ -23,7 +23,7 @@ public class RuntimeValue {
         return value;
     }
 
-    public boolean isNumbers() {
+    public boolean isNumber() {
         return type == Type.Integer || type == Type.Decimal;
     }
 
