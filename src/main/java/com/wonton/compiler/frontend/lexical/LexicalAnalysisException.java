@@ -2,26 +2,19 @@ package com.wonton.compiler.frontend.lexical;
 
 public class LexicalAnalysisException extends RuntimeException {
 
-    private final int line;
-    private final int column;
+    private final Position position;
 
     public LexicalAnalysisException(String message) {
         super(message);
-        this.line = -1;
-        this.column = -1;
+        this.position = new Position(-1, -1, -1);
     }
 
-    public LexicalAnalysisException(String message, int line, int column) {
-        super(String.format("[行 %d 列 %d] %s", line, column, message));
-        this.line = line;
-        this.column = column;
+    public LexicalAnalysisException(String message, Position position) {
+        super(String.format("[行 %d 列 %d:%d] %s", position.getLine(), position.getStart(), position.getEnd(), message));
+        this.position = position;
     }
 
-    public int getLine() {
-        return line;
-    }
-
-    public int getColumn() {
-        return column;
+    public Position getPosition() {
+        return position;
     }
 }

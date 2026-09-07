@@ -71,7 +71,7 @@ public class Lexer {
                     }
                 }
                 else {
-                    throw new LexicalAnalysisException("源码中含有不支持的空白字符:" + StringUtils.unescape(ch));
+                    scanError("源码中含有不支持的空白字符:" + StringUtils.unescape(ch));
                 }
             }
             // 字符串
@@ -84,9 +84,8 @@ public class Lexer {
                         scanError("字符串未闭合，缺少结束的引号");
                     }
                     // 不允许直接写真实的换行符，应该用转义符来表示
-                    // 宿主语言为了表示换行，需要用转义符来表示
                     if (c == '\n') {
-                        scanError("字符串不能包含真实的换行符");
+                        scanError("字符串中不能使用真实的换行符，应该使用转义符\\n");
                     }
                     if (c == '"') {
                         break;
@@ -151,8 +150,7 @@ public class Lexer {
             else if(ch == '%') addToken(TokenType.Modulo);
             else if(ch == '^') addToken(TokenType.Caret);
             else {
-                // TODO throw new RuntimeException("代码中存在不支持的字符，在什么什么附近");
-                System.err.printf("警告：未知字符【%s】，需要完善语法支持", ch);
+                scanError("未知字符【" + ch + "】");
             }
         }
         return tokens;
@@ -217,7 +215,7 @@ public class Lexer {
             case '"' -> '"';    // 双引号本身
             case 'u' -> unicodeEscape();
             default -> {
-                scanError("不支持的转义字符：\\" + escaped);
+                scanError("未知的转义字符【" + escaped + "】");
                 yield '\0'; // 跳出switch表达式
             }
         };
@@ -305,7 +303,7 @@ public class Lexer {
     }
 
     private void scanError(String message) {
-        throw new RuntimeException(String.format("[行 %s 列 %s] %s", line, current, message));
+        throw new LexicalAnalysisException(message, new Position(line, start, current));
     }
 
 }
