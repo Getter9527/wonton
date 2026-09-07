@@ -23,13 +23,13 @@ public class Keywords {
         keywords.put("false",    TokenType.Boolean);
         keywords.put("var",      TokenType.Variable);
         keywords.put("const",    TokenType.Const);
-        keywords.put("void",     TokenType.Void);
         keywords.put("return",   TokenType.Return);
         keywords.put("function", TokenType.Function);
         keywords.put("int",      TokenType.TypeInteger);
         keywords.put("decimal",  TokenType.TypeDecimal);
         keywords.put("string",   TokenType.TypeString);
         keywords.put("boolean",  TokenType.TypeBoolean);
+        keywords.put("void",     TokenType.TypeVoid);
     }
 
     public static TokenType getType(String lexeme) {

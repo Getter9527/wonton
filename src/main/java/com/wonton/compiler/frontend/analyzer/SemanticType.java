@@ -46,7 +46,8 @@ public class SemanticType {
             case TokenType.TypeDecimal  -> DECIMAL_INSTANCE;
             case TokenType.TypeString   -> STRING_INSTANCE;
             case TokenType.TypeBoolean  -> BOOLEAN_INSTANCE;
-            default       -> UNKNOWN_INSTANCE;
+            case TokenType.TypeVoid     -> VOID_INSTANCE;
+            default                     -> UNKNOWN_INSTANCE;
         };
     }
 

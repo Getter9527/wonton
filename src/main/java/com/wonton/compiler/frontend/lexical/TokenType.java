@@ -56,6 +56,7 @@ public enum TokenType {
     TypeDecimal,
     TypeString,
     TypeBoolean,
+    TypeVoid,
 
     Print,
     Println,

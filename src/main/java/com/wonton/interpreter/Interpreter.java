@@ -282,7 +282,7 @@ public class Interpreter {
         // 将函数定义时所处的环境作为新环境的“父级”。这就是闭包（Closure）的实现原理 —— 让函数内部能访问外部变量，但外部访问不到内部变量。
         Environment funcEnv = new Environment(funcValue.getClosure());
         for (int i = 0; i < argValues.size(); i++) {
-            String paramName = funcValue.getParams().get(i).getLexeme();
+            String paramName = funcValue.getParams().get(i).getName().getLexeme();
             // 绑定参数：将函数的参数定义到当前函数作用域范围内
             funcEnv.define(paramName, argValues.get(i), false);
         }

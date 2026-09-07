@@ -80,16 +80,14 @@ public class SemanticAnalyzer {
             throw new SemanticAnalysisException("相同作用域中，存在重复名称的函数：" + funcName, func.getName().getLine());
         }
 
-        // 推导形参类型类型
+        // 形参的类型列表
         List<SemanticType> paramTypes = new ArrayList<>();
-        for (Token param : func.getParams()) {
-            // TODO 需要根据类型注解来决定形参是什么类型
-            // TODO var a = 1;
-            paramTypes.add(SemanticType.UNKNOWN_INSTANCE);
+        for (ParameterDeclarationStmt param : func.getParams()) {
+            paramTypes.add(SemanticType.from(param.getType()));
         }
 
-        // TODO 推导函数返回值类型
-        SemanticType returnType = SemanticType.UNKNOWN_INSTANCE;
+        // 返回值的类型
+        SemanticType returnType = SemanticType.from(func.getReturnType());
 
         // 注册函数符号
         SemanticType funcType = SemanticType.newFunctionType(returnType, paramTypes);
@@ -99,9 +97,9 @@ public class SemanticAnalyzer {
         ProgramScope subScope = new ProgramScope(scope);
 
         // 注册形参
-        List<Token> params = func.getParams();
+        List<ParameterDeclarationStmt> params = func.getParams();
         for (int i = 0; i < params.size(); i++) {
-            String paramName = params.get(i).getLexeme();
+            String paramName = params.get(i).getName().getLexeme();
             subScope.define(paramName, paramTypes.get(i), false);
         }
 

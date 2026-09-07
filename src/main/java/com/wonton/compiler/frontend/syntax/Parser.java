@@ -128,48 +128,6 @@ public class Parser {
         return null;
     }
 
-    private Stmt functionDeclaration() {
-        advance();
-        Token funcName = expect(TokenType.Identifier);
-        pass(TokenType.LeftParen);
-        List<Token> params = new ArrayList<>();
-        // 有参数
-        if (!check(TokenType.RightParen)) {
-            // 添加第1个参数
-            params.add(expect(TokenType.Identifier));
-            // 添加后续参数
-            while (match(TokenType.Comma)) {
-                params.add(expect(TokenType.Identifier));
-            }
-        }
-        pass(TokenType.RightParen);
-        BlockStmt funcBody = blockStmt();
-        return new FunctionDeclarationStmt(funcName, params, funcBody);
-    }
-
-    private Stmt returnStmt() {
-        Token keyword = advance(); // 拿到返回值关键字
-        Expr value = null;
-        // 设置返回值
-        if (!check(TokenType.Semicolon)) {
-            value = expr();
-        }
-        pass(TokenType.Semicolon);
-        return new ReturnStmt(keyword, value);
-    }
-
-    /**
-     * 表达式语句
-     * <exprStmt> ::= <expr> ";"
-     *
-     * @return 表达式语句节点
-     */
-    private Stmt expressionStmt() {
-        Expr expr = expr();
-        pass(TokenType.Semicolon);
-        return new ExpressionStmt(expr);
-    }
-
     /**
      * 变量/常量声明语句
      * <declaration> ::= "var" <identifier> ("=" <expr>)? ";"
@@ -236,6 +194,65 @@ public class Parser {
             throw new RuntimeException("语句块未闭合，缺少右大括号：}");
         }
         return new BlockStmt(stmtList);
+    }
+
+    private ParameterDeclarationStmt paramDeclaration() {
+        Token name = expect(TokenType.Identifier);
+        // 类型注解
+        pass(TokenType.Colon);
+        Token type = parseTypeAnnotation();
+        // 初始化值
+        Expr initializer = null;
+        if (match(TokenType.Equal)) {
+            initializer = expr();
+        }
+        return new ParameterDeclarationStmt(name, type, initializer);
+    }
+
+    private Stmt functionDeclaration() {
+        advance();
+        Token funcName = expect(TokenType.Identifier);
+        // 参数列表
+        pass(TokenType.LeftParen);
+        List<ParameterDeclarationStmt> params = new ArrayList<>();
+        // 有参数
+        if (!check(TokenType.RightParen)) {
+            // 添加第1个参数
+            params.add(paramDeclaration());
+            // 添加后续参数
+            while (match(TokenType.Comma)) {
+                params.add(paramDeclaration());
+            }
+        }
+        pass(TokenType.RightParen);
+        // 返回值类型注解
+        Token returnType = parseReturnTypeAnnotation();
+        // 语句块
+        BlockStmt funcBody = blockStmt();
+        return new FunctionDeclarationStmt(funcName, params, returnType, funcBody);
+    }
+
+    private Stmt returnStmt() {
+        Token keyword = advance(); // 拿到返回值关键字
+        Expr value = null;
+        // 设置返回值
+        if (!check(TokenType.Semicolon)) {
+            value = expr();
+        }
+        pass(TokenType.Semicolon);
+        return new ReturnStmt(keyword, value);
+    }
+
+    /**
+     * 表达式语句
+     * <exprStmt> ::= <expr> ";"
+     *
+     * @return 表达式语句节点
+     */
+    private Stmt expressionStmt() {
+        Expr expr = expr();
+        pass(TokenType.Semicolon);
+        return new ExpressionStmt(expr);
     }
 
     private Expr expr() {
@@ -616,6 +633,22 @@ public class Parser {
         }
         parseError("期望类型注解（integer、decimal、string、boolean 或用户自定义类型），但遇到：" + token.getLexeme(), token.getLine());
         return null;
+    }
+
+    /**
+     * 检查返回值类型注解，允许Void
+     */
+    private Token parseReturnTypeAnnotation() {
+        // 如果用户没有写返回值类型注解，那么则创建一个 Void作为类型注解
+        if (!match(TokenType.Colon)) {
+            return new Token(TokenType.TypeVoid, "void", null, previous().getPosition());
+        }
+        // 显示 Void类型
+        if (match(TokenType.TypeVoid)) {
+            return previous();
+        }
+        // 其它类型注解合法性检查
+        return parseReturnTypeAnnotation();
     }
 
     private void parseError(String message, int line) {

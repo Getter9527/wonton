@@ -2,6 +2,7 @@ package com.wonton.interpreter;
 
 import com.wonton.compiler.frontend.lexical.Token;
 import com.wonton.compiler.frontend.syntax.node.statement.BlockStmt;
+import com.wonton.compiler.frontend.syntax.node.statement.ParameterDeclarationStmt;
 
 import java.util.List;
 
@@ -13,7 +14,7 @@ import java.util.List;
 public class FunctionValue {
 
     private final String name;
-    private final List<Token> params;
+    private final List<ParameterDeclarationStmt> params;
     private final BlockStmt body;
     private final Environment closure;
 
@@ -23,7 +24,7 @@ public class FunctionValue {
      * @param body    函数体
      * @param closure 声明处的环境（闭包）
      */
-    public FunctionValue(String name, List<Token> params, BlockStmt body, Environment closure) {
+    public FunctionValue(String name, List<ParameterDeclarationStmt> params, BlockStmt body, Environment closure) {
         this.name = name;
         this.params = params;
         this.body = body;
@@ -42,9 +43,8 @@ public class FunctionValue {
     /**
      * 获取形参列表
      *
-     * @return 形参 Token 列表
      */
-    public List<Token> getParams() {
+    public List<ParameterDeclarationStmt> getParams() {
         return params;
     }
 

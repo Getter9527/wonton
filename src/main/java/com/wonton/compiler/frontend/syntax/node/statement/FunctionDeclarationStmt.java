@@ -7,12 +7,14 @@ import java.util.List;
 public class FunctionDeclarationStmt extends Stmt {
 
     private final Token name;
-    private final List<Token> params; // params是形参列表，args是实参列表
+    private final List<ParameterDeclarationStmt> params; // params是形参列表，args是实参列表
+    private final Token returnType;
     private final BlockStmt body;
 
-    public FunctionDeclarationStmt(final Token name, final List<Token> params, final BlockStmt body) {
+    public FunctionDeclarationStmt(final Token name, final List<ParameterDeclarationStmt> params, final Token returnType, final BlockStmt body) {
         this.name = name;
         this.params = params;
+        this.returnType = returnType;
         this.body = body;
     }
 
@@ -20,8 +22,12 @@ public class FunctionDeclarationStmt extends Stmt {
         return name;
     }
 
-    public List<Token> getParams() {
+    public List<ParameterDeclarationStmt> getParams() {
         return params;
+    }
+
+    public Token getReturnType() {
+        return returnType;
     }
 
     public BlockStmt getBody() {
@@ -40,11 +46,14 @@ public class FunctionDeclarationStmt extends Stmt {
             builder.append("None").append("\n");
         } else {
             builder.append("\n");
-            for (Token param : getParams()) {
+            for (ParameterDeclarationStmt param : getParams()) {
                 builder.append(indent(depth + 2));
-                builder.append("- ").append(param.getLexeme()).append("\n");
+                builder.append("- ").append(param.getName().getLexeme()).append("\n");
             }
         }
+        // 返回类型
+        builder.append(indent(depth + 1)).append("Return: ").append(getReturnType().getLexeme()).append("\n");
+        // 函数体
         builder.append(getBody().pretty(depth + 1));
         return builder.toString();
     }
