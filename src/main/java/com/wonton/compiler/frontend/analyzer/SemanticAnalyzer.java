@@ -80,11 +80,11 @@ public class SemanticAnalyzer {
         for (Token param : func.getParams()) {
             // TODO 需要根据类型注解来决定形参是什么类型
             // TODO var a = 1;
-            paramTypes.add(SemanticType.UNKNOWN);
+            paramTypes.add(SemanticType.UNKNOWN_INSTANCE);
         }
 
         // TODO 推导函数返回值类型
-        SemanticType returnType = SemanticType.UNKNOWN;
+        SemanticType returnType = SemanticType.UNKNOWN_INSTANCE;
 
         // 注册函数符号
         SemanticType funcType = SemanticType.newFunctionType(returnType, paramTypes);
@@ -115,14 +115,23 @@ public class SemanticAnalyzer {
             throw new SemanticAnalysisException("变量重复定义：" + varName, variable.getIdentifier().getLine());
         }
 
-        // 例: var x;
-        SemanticType varType = SemanticType.UNKNOWN;
+        // 声明的类型
+        SemanticType varType = SemanticType.from(variable.getType());
         // 如果初始化表达式不为空（说白了就是有赋值动作）
         if (variable.getInitializer() != null) {
             // 先对表达式，做语义化分析检查；然后才可以被后续使用
             analyzeExpr(variable.getInitializer(), scope);
-            // 例: var x = 1 + 2;
-            varType = typeChecker.inferType(variable.getInitializer(), scope);
+            // 赋的值类型（动态推导）
+            SemanticType initializerType = typeChecker.inferType(variable.getInitializer(), scope);
+            // 判断声明类型和赋值类型是否匹配
+            if (!varType.isCompatible(initializerType)) {
+                throw new SemanticAnalysisException(
+                        MessageFormat.format(
+                                "类型不匹配：变量 {0} 声明类型为 {1}，初始化表达式类型为 {2}，在 {3} 行",
+                                varName, varType, initializerType, variable.getIdentifier().getLine()
+                        )
+                );
+            }
         }
         scope.define(varName, varType, false);
     }
@@ -135,15 +144,25 @@ public class SemanticAnalyzer {
         if (scope.hasLocal(constName)) {
             throw new SemanticAnalysisException("常量重复定义：" + constName, constant.getIdentifier().getLine());
         }
-        // 例: const x = 1;
-        // 这里判断 == null，是Java中的未赋值，而不是我们编程语言中赋值为null
+
+        // 常量必须初始化
         if (constant.getInitializer() == null) {
             throw new SemanticAnalysisException("常量声明必须初始化：" + constName, constant.getIdentifier().getLine());
         }
+        // 常量声明的类型
+        SemanticType constType = SemanticType.from(constant.getType());
         // 对表达式做语义分析
         analyzeExpr(constant.getInitializer(), scope);
         // 推导常量类型
-        SemanticType constType = typeChecker.inferType(constant.getInitializer(), scope);
+        SemanticType initializerType = typeChecker.inferType(constant.getInitializer(), scope);
+        if (!constType.isCompatible(initializerType)) {
+            throw new SemanticAnalysisException(
+                    MessageFormat.format(
+                            "类型不匹配：常量 {0} 声明类型为 {1}，初始化表达式类型为 {2}，在 {3} 行",
+                            constName, constType, initializerType, constant.getIdentifier().getLine()
+                    )
+            );
+        }
         scope.define(constName, constType, true);
     }
 

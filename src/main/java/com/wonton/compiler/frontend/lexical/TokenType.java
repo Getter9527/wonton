@@ -27,6 +27,7 @@ public enum TokenType {
 
     Dot,                // .
     Comma,              // ,
+    Colon,              // :
     Semicolon,          // ;
     Modulo,             // %
     Caret,              // ^
@@ -50,6 +51,11 @@ public enum TokenType {
     Boolean,
     Null,
     Void,
+
+    TypeInteger,
+    TypeDecimal,
+    TypeString,
+    TypeBoolean,
 
     Print,
     Println,

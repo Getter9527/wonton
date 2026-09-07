@@ -1,5 +1,8 @@
 package com.wonton.compiler.frontend.analyzer;
 
+import com.wonton.compiler.frontend.lexical.Token;
+import com.wonton.compiler.frontend.lexical.TokenType;
+
 import java.util.List;
 
 /**
@@ -9,13 +12,13 @@ import java.util.List;
 public class SemanticType {
 
     // 下列这些类型都是可以复用的，采用单例
-    public static final SemanticType INTEGER  = SemanticType.newBasicType(Tag.INTEGER);
-    public static final SemanticType DECIMAL  = SemanticType.newBasicType(Tag.DECIMAL);
-    public static final SemanticType STRING   = SemanticType.newBasicType(Tag.STRING);
-    public static final SemanticType BOOLEAN  = SemanticType.newBasicType(Tag.BOOLEAN);
-    public static final SemanticType VOID     = SemanticType.newBasicType(Tag.VOID);
-    public static final SemanticType NULL     = SemanticType.newBasicType(Tag.NULL);
-    public static final SemanticType UNKNOWN  = SemanticType.newBasicType(Tag.UNKNOWN);
+    public static final SemanticType INTEGER_INSTANCE = SemanticType.newBasicType(Tag.INTEGER);
+    public static final SemanticType DECIMAL_INSTANCE = SemanticType.newBasicType(Tag.DECIMAL);
+    public static final SemanticType STRING_INSTANCE = SemanticType.newBasicType(Tag.STRING);
+    public static final SemanticType BOOLEAN_INSTANCE = SemanticType.newBasicType(Tag.BOOLEAN);
+    public static final SemanticType VOID_INSTANCE = SemanticType.newBasicType(Tag.VOID);
+    public static final SemanticType NULL_INSTANCE = SemanticType.newBasicType(Tag.NULL);
+    public static final SemanticType UNKNOWN_INSTANCE = SemanticType.newBasicType(Tag.UNKNOWN);
 
     private final Tag tag;
 
@@ -35,6 +38,16 @@ public class SemanticType {
 
     public static SemanticType newFunctionType(SemanticType returnType, List<SemanticType> paramTypes) {
         return new SemanticType(Tag.FUNCTION, returnType, paramTypes);
+    }
+    
+    public static SemanticType from(Token token) {
+        return switch (token.getType()) {
+            case TokenType.TypeInteger  -> INTEGER_INSTANCE;
+            case TokenType.TypeDecimal  -> DECIMAL_INSTANCE;
+            case TokenType.TypeString   -> STRING_INSTANCE;
+            case TokenType.TypeBoolean  -> BOOLEAN_INSTANCE;
+            default       -> UNKNOWN_INSTANCE;
+        };
     }
 
     public Tag getTag() {

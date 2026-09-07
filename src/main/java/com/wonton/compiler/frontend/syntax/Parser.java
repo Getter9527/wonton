@@ -177,6 +177,8 @@ public class Parser {
     private Stmt variableDeclaration() {
         advance();
         Token name = expect(TokenType.Identifier);
+        pass(TokenType.Colon);
+        Token type = parseTypeAnnotation();
         Expr initializer = null;
         // 声明变量并赋值，例: var a = 1;
         if (match(TokenType.Equal)) {
@@ -184,7 +186,7 @@ public class Parser {
         }
         // 仅声明变量，例: var a;
         consume(TokenType.Semicolon);
-        return new VariableDeclarationStmt(name, initializer);
+        return new VariableDeclarationStmt(name, type, initializer);
     }
 
     /**
@@ -194,6 +196,8 @@ public class Parser {
     private Stmt constantDeclaration() {
         advance();
         Token identifier = expect(TokenType.Identifier);
+        pass(TokenType.Colon);
+        Token type = parseTypeAnnotation();
         Expr initializer = null;
         // 声明常量并赋值，例: var a = 1;
         if (match(TokenType.Equal)) {
@@ -201,7 +205,7 @@ public class Parser {
         }
         // 仅声明常量，例: var a;
         consume(TokenType.Semicolon);
-        return new ConstantDeclarationStmt(identifier, initializer);
+        return new ConstantDeclarationStmt(identifier, type, initializer);
     }
 
     /**
@@ -537,9 +541,10 @@ public class Parser {
      * 检查Token，如果符合类型，则通过
      */
     private void pass(TokenType type) {
-        if (check(type)) {
-            current++;
+        if (!check(type)) {
+            parseError("期望TokenType:" + type, previous().getLine());
         }
+        current++;
     }
 
     /**
@@ -600,6 +605,18 @@ public class Parser {
         }
         // 符合预期
         return advance();
+    }
+
+    private Token parseTypeAnnotation() {
+        Token token = peek();
+        if (matchAny(TokenType.TypeInteger, TokenType.TypeDecimal, TokenType.TypeString, TokenType.TypeBoolean)) {
+            return previous();
+        }
+        if (match(TokenType.Identifier)) {
+            return previous();
+        }
+        parseError("期望类型注解（integer、decimal、string、boolean 或用户自定义类型），但遇到：" + token.getLexeme(), token.getLine());
+        return null;
     }
 
     private void parseError(String message, int line) {

@@ -9,15 +9,21 @@ import com.wonton.compiler.frontend.syntax.node.expression.Expr;
 public class ConstantDeclarationStmt extends Stmt {
 
     private final Token identifier;
+    private final Token type;
     private final Expr initializer;
 
-    public ConstantDeclarationStmt(final Token identifier, final Expr initializer) {
+    public ConstantDeclarationStmt(final Token identifier, final Token type, final Expr initializer) {
         this.identifier = identifier;
+        this.type = type;
         this.initializer = initializer;
     }
 
     public Token getIdentifier() {
         return identifier;
+    }
+
+    public Token getType() {
+        return type;
     }
 
     public Expr getInitializer() {

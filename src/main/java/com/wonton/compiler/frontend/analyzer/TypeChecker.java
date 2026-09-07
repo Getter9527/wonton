@@ -25,20 +25,20 @@ public class TypeChecker {
      */
     public SemanticType inferType(Expr expr, ProgramScope scope) {
         return switch (expr) {
-            case null -> SemanticType.VOID;
+            case null -> SemanticType.VOID_INSTANCE;
             // 根据表达式类型推断
-            case IntegerExpr intExpr -> SemanticType.INTEGER;
-            case DecimalExpr decimalExpr -> SemanticType.DECIMAL;
-            case StringExpr strExpr -> SemanticType.STRING;
-            case NullExpr nullExpr -> SemanticType.NULL;
-            case BooleanExpr booleanExpr -> SemanticType.BOOLEAN;
-            case LogicalExpr logicalExpr -> SemanticType.BOOLEAN;
+            case IntegerExpr intExpr -> SemanticType.INTEGER_INSTANCE;
+            case DecimalExpr decimalExpr -> SemanticType.DECIMAL_INSTANCE;
+            case StringExpr strExpr -> SemanticType.STRING_INSTANCE;
+            case NullExpr nullExpr -> SemanticType.NULL_INSTANCE;
+            case BooleanExpr booleanExpr -> SemanticType.BOOLEAN_INSTANCE;
+            case LogicalExpr logicalExpr -> SemanticType.BOOLEAN_INSTANCE;
             case VariableExpr varExpr -> inferVariable(varExpr, scope);
             case BinaryExpr binExpr -> inferBinary(binExpr, scope);
             case UnaryExpr unaryExpr -> inferUnary(unaryExpr, scope);
             case ParenExpr parenExpr -> inferParen(parenExpr, scope);
             case FunctionCallExpr callExpr -> inferFunctionCall(callExpr, scope);
-            default -> SemanticType.UNKNOWN;
+            default -> SemanticType.UNKNOWN_INSTANCE;
         };
 
     }
@@ -72,42 +72,42 @@ public class TypeChecker {
             case Plus -> {
                 if (allNumbers(leftType, rightType)) {
                     if (hasDecimal(leftType, rightType)) {
-                        return SemanticType.DECIMAL;
+                        return SemanticType.DECIMAL_INSTANCE;
                     }
-                    return SemanticType.INTEGER;
+                    return SemanticType.INTEGER_INSTANCE;
                 }
                 if (hasString(leftType, rightType)) {
-                    return SemanticType.STRING;
+                    return SemanticType.STRING_INSTANCE;
                 }
             }
             case Minus, Star, Slash, Modulo -> {
                 if (allNumbers(leftType, rightType)) {
                     if (hasDecimal(leftType, rightType)) {
-                        return SemanticType.DECIMAL;
+                        return SemanticType.DECIMAL_INSTANCE;
                     }
-                    return SemanticType.INTEGER;
+                    return SemanticType.INTEGER_INSTANCE;
                 }
             }
             case Caret -> {
                 // 幂运算比较特殊，由于负整数的幂运算结果可能为小数，因此返回 DECIMAL
                 if (allNumbers(leftType, rightType)) {
-                    return SemanticType.DECIMAL;
+                    return SemanticType.DECIMAL_INSTANCE;
                 }
             }
             case Less, LessEqual, Greater, GreaterEqual -> {
                 // TODO 目前仅支持数值之间的比较，其它可后续扩展
                 if (allNumbers(leftType, rightType)) {
-                    return SemanticType.BOOLEAN;
+                    return SemanticType.BOOLEAN_INSTANCE;
                 }
             }
             case Equalx2, NotEqual -> {
                 // 支持数值和布尔值之间的比较
                 if (allNumbers(leftType, rightType) || allBooleans(leftType, rightType) || allStrings(leftType, rightType)) {
-                    return SemanticType.BOOLEAN;
+                    return SemanticType.BOOLEAN_INSTANCE;
                 }
             }
             default -> {
-                return SemanticType.UNKNOWN;
+                return SemanticType.UNKNOWN_INSTANCE;
             }
         }
         // 不满足上述规则之一时，则走到这
@@ -138,11 +138,11 @@ public class TypeChecker {
             case Not -> {
                 // 仅作用于布尔类型
                 if (operandType.isBoolean()) {
-                    return SemanticType.BOOLEAN;
+                    return SemanticType.BOOLEAN_INSTANCE;
                 }
             }
             default -> {
-                return SemanticType.UNKNOWN;
+                return SemanticType.UNKNOWN_INSTANCE;
             }
         }
         // 不满足上述规则之一时，则走到这
@@ -210,7 +210,7 @@ public class TypeChecker {
     private SemanticType inferReturnType(BlockStmt block, ProgramScope scope) {
         // 函数体为空时，返回值类型为 void
         if (isEmptyBlockStmt(block)) {
-            return SemanticType.VOID;
+            return SemanticType.VOID_INSTANCE;
         }
 
         // 遍历函数体，查找 return 语句
@@ -226,7 +226,7 @@ public class TypeChecker {
             // TODO 需要考虑 if, else, while, for, 语句块等嵌套情况
         }
 
-        return SemanticType.VOID;
+        return SemanticType.VOID_INSTANCE;
     }
 
     /**

@@ -16,7 +16,7 @@ public class ProgramScope {
     private final Set<String> constants = new HashSet<>();
 
     // 存储当前环境的返回值类型
-    private SemanticType returnType = SemanticType.VOID;
+    private SemanticType returnType = SemanticType.VOID_INSTANCE;
 
     public ProgramScope() {
         this(null);

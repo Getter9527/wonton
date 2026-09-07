@@ -140,6 +140,7 @@ public class Lexer {
             else if(ch == '/') addToken(TokenType.Slash);
             else if(ch == '.') addToken(TokenType.Dot);
             else if(ch == ',') addToken(TokenType.Comma);
+            else if(ch == ':') addToken(TokenType.Colon);
             else if(ch == ';') addToken(TokenType.Semicolon);
             else if(ch == '(') addToken(TokenType.LeftParen);
             else if(ch == ')') addToken(TokenType.RightParen);
