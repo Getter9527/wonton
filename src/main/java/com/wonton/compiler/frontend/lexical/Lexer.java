@@ -159,12 +159,11 @@ public class Lexer {
     }
 
     private void addToken(TokenType type) {
-        Token token = new Token(type, getLexeme(), getLiteral(type), line);
-        tokens.add(token);
+        addToken(type, getLiteral(type));
     }
 
     private void addToken(TokenType type, Object literal) {
-        Token token = new Token(type, getLexeme(), literal, line);
+        Token token = new Token(type, getLexeme(), literal, new Position(line, start, current));
         tokens.add(token);
     }
 

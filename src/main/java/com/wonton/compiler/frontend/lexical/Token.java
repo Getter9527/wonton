@@ -10,13 +10,13 @@ public class Token {
     private final TokenType type;
     private final String lexeme;
     private final Object literal;
-    private final int line;
+    private final Position position;
 
-    public Token(TokenType type, String lexeme, Object literal, int line) {
+    public Token(final TokenType type, final String lexeme, final Object literal, final Position position) {
         this.type = type;
         this.lexeme = lexeme;
         this.literal = literal;
-        this.line = line;
+        this.position = position;
     }
 
     public TokenType getType() {
@@ -31,8 +31,12 @@ public class Token {
         return literal;
     }
 
+    public Position getPosition() {
+        return position;
+    }
+
     public int getLine() {
-        return line;
+        return getPosition().getLine();
     }
 
     @Override
@@ -41,7 +45,7 @@ public class Token {
         Object displayLiteral = literal instanceof String str
                 ? StringUtils.unescape(str)
                 : literal;
-        return String.format("类型: %-16s  词素: %-16s  字面量: %-12s  行: %-6s", type, lexeme, displayLiteral, line);
+        return String.format("Token(type=%s, lexeme=%s, literal=%s, position=%s)", type, lexeme, displayLiteral, position);
     }
 
 }
