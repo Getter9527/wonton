@@ -58,10 +58,21 @@ public class Lexer {
             }
             // 空白符
             else if(Character.isWhitespace(ch)) {
-                if(ch == ' ') continue; // 忽略空格
-                else if (ch == '\t') continue; // 忽略制表符
-                else if(ch == '\n' || ch == '\r') line++; // 记录行号
-                else throw new RuntimeException("代码中存在不支持的空白字符:" + StringUtils.unescape(String.valueOf(ch)));
+                // 忽略
+                if(ch == ' ' || ch == '\t') continue;
+                // Unix系统：换行
+                else if(ch == '\n') line++; // 记录行号
+                // Windows系统：回车 换行
+                else if (ch == '\r') {
+                    char next = peekNext();
+                    if (next == '\n') {
+                        advance();
+                        line++;
+                    }
+                }
+                else {
+                    throw new LexicalAnalysisException("源码中含有不支持的空白字符:" + StringUtils.unescape(ch));
+                }
             }
             // 字符串
             else if(ch == '"') {
@@ -253,8 +264,17 @@ public class Lexer {
 
     // 查看当前指针的字符，但是不消费它
     private char peek() {
-        if (isAtEnd()) return '\0';
+        if (isAtEnd()) {
+            return '\0';
+        }
         return source.charAt(current);
+    }
+
+    private char peekNext() {
+        if (isNextAtEnd()) {
+            return '\0';
+        }
+        return source.charAt(current + 1);
     }
 
     // 拿到待消费字符并返回，向后推进
@@ -281,8 +301,12 @@ public class Lexer {
         return current >= source.length();
     }
 
+    private boolean isNextAtEnd() {
+        return current + 1 >= source.length();
+    }
+
     private void scanError(String message) {
-        throw new RuntimeException("[行 " + line + "] 词法错误：" + message);
+        throw new RuntimeException(String.format("[行 %s 列 %s] %s", line, current, message));
     }
 
 }
