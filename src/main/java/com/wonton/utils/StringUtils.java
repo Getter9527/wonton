@@ -21,27 +21,29 @@ public class StringUtils {
         StringBuilder builder = new StringBuilder();
         for (int i = 0; i < text.length(); i++) {
             char c = text.charAt(i);
-            // 常用控制字符还原为对应的命名转义写法
-            switch (c) {
-                case '\n' -> builder.append("\\n");
-                case '\t' -> builder.append("\\t");
-                case '\r' -> builder.append("\\r");
-                case '\b' -> builder.append("\\b");
-                case '\f' -> builder.append("\\f");
-                case '\0' -> builder.append("\\0");
-                case '\\' -> builder.append("\\\\");
-                case '"' -> builder.append("\\\"");
-                default -> {
-                    // 其余不可打印控制字符统一用十六进制转义表示
-                    if (c < 32 || c == 127) {
-                        builder.append(String.format("\\u%04x", (int) c));
-                    } else {
-                        builder.append(c);
-                    }
-                }
-            }
+            builder.append(unescape(c));
         }
         return builder.toString();
+    }
+
+    public static String unescape(char c) {
+        return switch (c) {
+            case '\n' -> "\\n";
+            case '\t' -> "\\t";
+            case '\r' -> "\\r";
+            case '\b' -> "\\b";
+            case '\f' -> "\\f";
+            case '\0' -> "\\0";
+            case '\\' -> "\\\\";
+            case '"' -> "\\\"";
+            default -> {
+                // 其余不可打印控制字符统一用十六进制转义表示
+                if (c < 32 || c == 127) {
+                    yield String.format("\\u%04x", (int) c);
+                }
+                yield String.valueOf(c);
+            }
+        };
     }
 
 }
