@@ -6,6 +6,7 @@ import com.wonton.compiler.frontend.syntax.node.Program;
 import com.wonton.compiler.frontend.syntax.node.expression.*;
 import com.wonton.compiler.frontend.syntax.node.statement.*;
 
+import java.math.BigInteger;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.List;
@@ -60,6 +61,10 @@ public class SemanticAnalyzer {
             case ParenExpr        paren    -> analyzeParenExpr(paren, scope);
             case VariableExpr     variable -> analyzeVariableExpr(variable, scope);
             case FunctionCallExpr call     -> analyzeFunctionCallExpr(call, scope);
+            case IntegerExpr      integer  -> analyzeIntegerExpr(integer, scope);
+            case DecimalExpr      decimal  -> analyzeDecimalExpr(decimal, scope);
+            case BooleanExpr      bool     -> analyzeBooleanExpr(bool, scope);
+            case StringExpr       string   -> analyzeStringExpr(string, scope);
             default -> throw new IllegalStateException("analyzeExpr -> Unexpected value: " + expr);
         }
     }
@@ -324,5 +329,13 @@ public class SemanticAnalyzer {
             throw new SemanticAnalysisException("未定义的变量：" + varName, varExpr.getIdentifier().getLine());
         }
     }
+
+    private void analyzeIntegerExpr(IntegerExpr integerExpr, ProgramScope scope) {}
+
+    private void analyzeDecimalExpr(DecimalExpr decimalExpr, ProgramScope scope) {}
+
+    private void analyzeStringExpr(StringExpr stringExpr, ProgramScope scope) {}
+
+    private void analyzeBooleanExpr(BooleanExpr booleanExpr, ProgramScope scope) {}
 
 }
