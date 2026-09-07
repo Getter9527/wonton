@@ -33,10 +33,14 @@ public class VariableDeclarationStmt extends Stmt {
     @Override
     public String pretty(int depth) {
         StringBuilder builder = new StringBuilder();
-        builder.append(indent(depth));
-        builder.append("VariableDeclarationStmt\n");
+        builder.append(indent(depth)).append("VariableDeclarationStmt\n");
+
         String identifierFormat = indent(depth+1) + "Identifier(" + identifier.getLexeme() + ")" + "\n";
         builder.append(identifierFormat);
+
+        String typeFormat = indent(depth+1) + "TypeAnnotation(" + type.getLexeme() + ")" + "\n";
+        builder.append(typeFormat);
+
         String initializerFormat = indent(depth + 1) + "null";
         if (initializer != null) {
             initializerFormat = initializer.pretty(depth + 1);

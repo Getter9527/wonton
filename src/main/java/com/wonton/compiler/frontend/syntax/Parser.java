@@ -529,7 +529,6 @@ public class Parser {
 
     /**
      * 推进 Token
-     * @description 获取当前正在处理的 Token，并向后推进
      */
     private Token advance() {
         Token token = tokens.get(current);
