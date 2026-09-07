@@ -1,0 +1,6 @@
+var a: integer = 10;
+var b: string = "中国";
+
+print a;
+print b;
+print "\n";

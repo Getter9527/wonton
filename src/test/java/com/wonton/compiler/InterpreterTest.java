@@ -1,5 +1,7 @@
 package com.wonton.compiler;
 
+import com.wonton.compiler.frontend.analyzer.ProgramScope;
+import com.wonton.compiler.frontend.analyzer.SemanticAnalyzer;
 import com.wonton.compiler.frontend.lexical.Lexer;
 import com.wonton.compiler.frontend.lexical.Token;
 import com.wonton.compiler.frontend.syntax.Parser;
@@ -310,6 +312,31 @@ public class InterpreterTest {
         Parser parser = new Parser(tokens);
         Node ast = parser.parse();
         System.out.println(ast.toPrettyString());
+
+        // 解释执行
+        Interpreter interpreter = new Interpreter();
+        interpreter.interpret(ast, new Environment());
+    }
+
+    @Test
+    public void testTypeAnnotation() {
+        // 源代码
+        String source = FileUtils.readSource("scripts/type_annotation.wonton");
+
+        // tokens
+        Lexer lexer = new Lexer(source);
+        List<Token> tokens = lexer.tokenize();
+        for (var i = 0; i < tokens.size(); i++) {
+            Logger.info("序号: {0} {1}", String.format("%-6s", i+1), tokens.get(i));
+        }
+
+        // 语法树
+        Parser parser = new Parser(tokens);
+        Node ast = parser.parse();
+        System.out.println(ast.toPrettyString());
+
+        SemanticAnalyzer analyzer = new SemanticAnalyzer();
+        analyzer.analyze(ast, new ProgramScope());
 
         // 解释执行
         Interpreter interpreter = new Interpreter();
